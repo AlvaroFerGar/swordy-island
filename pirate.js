@@ -91,7 +91,7 @@ export default class Pirate extends THREE.Group {
       this.back = this.position.z - this.depth / 2;
     }
   
-    update(ground) {
+    update() {
       this.updateSides();
       if (this.zAcceleration) this.velocity.z += 0.0003;
       this.position.x += this.velocity.x;
