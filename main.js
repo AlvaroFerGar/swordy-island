@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Box from "./box.js";
+import Pirate from "./pirate.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -21,9 +22,9 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const cube = new Box({
+const cube = new Pirate({
   width: 1,
-  height: 1,
+  block_height: 1,
   depth: 1,
   velocity: {
     x: 0,
@@ -35,13 +36,13 @@ cube.castShadow = true;
 scene.add(cube);
 
 const ground = new Box({
-  width: 10,
+  width: 50,
   height: 0.5,
   depth: 50,
-  color: "#0369a1",
+  color: "#185452",
   position: {
     x: 0,
-    y: -2,
+    y: -0.25,
     z: 0,
   },
 });
@@ -77,8 +78,6 @@ const keys = {
 };
 
 window.addEventListener("keydown", (event) => {
-
-  console.log("manolo")
   switch (event.code) {
     case "KeyA":
       keys.a.pressed = true;
