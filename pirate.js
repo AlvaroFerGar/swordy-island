@@ -76,6 +76,11 @@ export default class Pirate extends THREE.Group {
       this.velocity = velocity;
       this.gravity = -0.002;
       this.zAcceleration = zAcceleration;
+
+      //
+      this.hasPositionGoal=false;
+      this.xGoal=0
+      this.zGoal=0
   
       // Initialize sides (based on bottom box position)
       this.updateSides();
@@ -97,21 +102,25 @@ export default class Pirate extends THREE.Group {
       this.position.x += this.velocity.x;
       this.position.z += this.velocity.z;
       //this.applyGravity(ground);
+
+      this.pathPlanning();
+
     }
   
-    applyGravity(ground) {
-      this.velocity.y += this.gravity;
-      
-      if (boxCollision({
-        box1: this,
-        box2: ground,
-      })) {
-        const friction = 0.5;
-        this.velocity.y *= friction;
-        this.velocity.y = -this.velocity.y;
-      } else {
-        this.position.y += this.velocity.y;
-      }
+    pathPlanning()
+    {
+      const movement_increment=0.5
+
+      const reached_x=Math.abs(this.position.x-this.xGoal)<movement_increment*3
+      const reached_z=Math.abs(this.position.z-this.zGoal)<movement_increment*3
+      if (this.hasPositionGoal)
+        {
+          console.log("tengo un objetivo");
+          this.position.x += (reached_x)?0:Math.sign(this.xGoal - this.position.x) * movement_increment;
+          this.position.z += (reached_z)?0:Math.sign(this.zGoal - this.position.z) * movement_increment;
+        }
+      if( reached_x && reached_z)
+          this.hasPositionGoal=false;
     }
   }
   

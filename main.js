@@ -243,6 +243,12 @@ window.addEventListener("click", (event) => {
   //console.log(`Clicked at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
   console.log(`[${intersection.x}, ${intersection.z}],`);
 
+
+  //Added clicked position to pirate
+  pirate.hasPositionGoal=true;
+  pirate.xGoal=intersection.x;
+  pirate.zGoal=intersection.z;
+
   //Debug tool to have feedback of clicks
   //scene.add(new Box({
   //  width: 0.5,
