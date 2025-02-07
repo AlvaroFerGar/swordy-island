@@ -40,13 +40,43 @@ const controls = new OrbitControls(camera, renderer.domElement);
 
 ///Lights
 const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.y = 20;
-light.position.z = camera.position.z-10;
+light.position.y = 10;
+light.position.z = camera.position.z-20;
 light.castShadow = true;
+light.shadow.bias = -0.005;  // Adjust as needed
 scene.add(light);
+let helper = new THREE.DirectionalLightHelper(light, 5);
+light.add(helper)
+
+
+
+const citylight = new THREE.PointLight(0xffbf00, 5,5);
+citylight.position.set(0, 0.5, 0)
+
+citylight.castShadow = true;
+scene.add(citylight);
+let cityhelper = new THREE.PointLightHelper(citylight, 2);
+citylight.add(cityhelper)
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+// Crear edificios (prismas) pequeños y de color amarillento
+function createBuilding(x, y, z, width, height, depth) {
+  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const material = new THREE.MeshLambertMaterial({ color: 0xffe066 }); // Color amarillento
+  const building = new THREE.Mesh(geometry, material);
+  building.position.set(x, y, z);
+  building.castShadow = true;
+  building.receiveShadow = true;
+  scene.add(building);
+}
 
+// Añadir algunos edificios
+createBuilding(1, 0, 2, 1, 1, 1); // Primer edificio
+createBuilding(-1, 0, -1, 1, 1, 1); // Segundo edificio
+createBuilding(0, 0, -3, 1, 1, 1); // Tercer edificio
+createBuilding(0.5, 0.5, 2, 1, 1, 1); // Primer edificio
+createBuilding(-2, 0, -1, 1, 1, 1); // Segundo edificio
+createBuilding(0.5, 0.75, -3, 1, 1, 1); // Tercer edificio
 
 ///Pirate
 const pirate = new Pirate({
@@ -149,7 +179,14 @@ loader.load('assets/swordyisland.svg', function (data) {
   scene.add(mesh);
 });
 
-
+// const shadowground = new THREE.Mesh(
+//   new THREE.PlaneGeometry(1000, 1000),
+//   new THREE.ShadowMaterial({ opacity: 0.5 })
+// );
+// shadowground.rotation.x = -Math.PI / 2;
+// shadowground.position.y = -2;
+// shadowground.receiveShadow = true;
+// scene.add(shadowground);
 
 
 
