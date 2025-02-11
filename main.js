@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import Box from "./box.js";
 import Pirate from "./pirate.js";
+import isPointInPolygon from "./polyutils.js"
 
 ///Scene
 const scene = new THREE.Scene();
@@ -146,7 +147,7 @@ window.addEventListener("keyup", (event) => {
 
 
 ///Ground
-
+let ground_polygon_vertices = []
 const loader = new SVGLoader();
 loader.load('assets/swordyisland.svg', function (data) {
   // Extract the paths from the SVG data
@@ -158,21 +159,22 @@ loader.load('assets/swordyisland.svg', function (data) {
   const offset_x=0
   const scale_y=1/2
   const offset_y=0
-  const ground_points = points.map(p => [p.x*scale_x+offset_x, p.y*scale_y+offset_y]);
+  ground_polygon_vertices = points.map(p => [p.x*scale_x+offset_x, p.y*scale_y+offset_y]);
 
   // Now create the shape from the extracted points
   const shape = new THREE.Shape();
-  ground_points.forEach((p, i) => {
+  ground_polygon_vertices.forEach((p, i) => {
     if (i === 0) shape.moveTo(p[0], p[1]);
     else shape.lineTo(p[0], p[1]);
   });
-  shape.lineTo(ground_points[0][0], ground_points[0][1]); // Close the shape
+  shape.lineTo(ground_polygon_vertices[0][0], ground_polygon_vertices[0][1]); // Close the shape
 
   const extrudeSettings = { steps: 1, depth: 2, bevelEnabled: false };
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   const material = new THREE.MeshStandardMaterial({ color: 0x185452 });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI / 2;
+  ground_polygon_vertices = ground_polygon_vertices.map(p => [p[0], -p[1]])//Chanigng symbol in zs as we have rotated
   mesh.position.y = -2;
   mesh.receiveShadow = true;
   mesh.castShadow = true;
@@ -260,6 +262,44 @@ ocean.receiveShadow = true;
 scene.add(ocean);
 
 
+  scene.add(new Box({
+   width: 1,
+   height: 1,
+   depth: 1,
+   color: "#ff0000",
+   position: {
+     x: 4,
+     y: 0,
+     z: 0,
+   },
+  }));
+
+  scene.add(new Box({
+    width: 1,
+    height: 1,
+    depth: 1,
+    color: "#0000ff",
+    position: {
+      x: 0,
+      y: 0,
+      z: 4,
+    },
+   }));
+
+   
+   scene.add(new Box({
+    width: 1,
+    height: 1,
+    depth: 1,
+    color: "#000000",
+    position: {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+   }));
+ 
+
 //Ray Casting
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -281,23 +321,25 @@ window.addEventListener("click", (event) => {
   console.log(`[${intersection.x}, ${intersection.z}],`);
 
 
-  //Added clicked position to pirate
-  pirate.hasPositionGoal=true;
-  pirate.xGoal=intersection.x;
-  pirate.zGoal=intersection.z;
-
+  if(isPointInPolygon(intersection,ground_polygon_vertices))
+  {
+    //Added clicked position to pirate
+    pirate.hasPositionGoal=true;
+    pirate.xGoal=intersection.x;
+    pirate.zGoal=intersection.z;
+  }
   //Debug tool to have feedback of clicks
-  //scene.add(new Box({
-  //  width: 0.5,
-  //  height: 0.5,
-  //  depth: 0.5,
-  //  color: "#ff0000",
-  //  position: {
-  //    x: intersection.x,
-  //    y: 1,
-  //    z: intersection.z,
-  //  },
-  //}));
+  // scene.add(new Box({
+  //   width: 0.5,
+  //   height: 0.5,
+  //   depth: 0.5,
+  //   color: "#ff0000",
+  //   position: {
+  //     x: intersection.x,
+  //     y: 1,
+  //     z: intersection.z,
+  //   },
+  // }));
 
 });
 
