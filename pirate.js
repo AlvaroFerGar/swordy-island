@@ -33,23 +33,31 @@ export default class Pirate extends THREE.Group {
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color: color_legs })
       );
+this.bottomBox.castShadow=true
+      this.bottomBox.receiveShadow=true
       
       // Middle box (body) - Blue
       this.middleBox = new THREE.Mesh(
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color: color_body })
       );
+this.middleBox.castShadow=true
+      this.middleBox.receiveShadow=true
       
       // Top box (head) - Beige
       this.topBox = new THREE.Mesh(
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color:  color_face})
       );
+this.topBox.castShadow=true
+      this.topBox.receiveShadow=true
   
       this.hairBox = new THREE.Mesh(
         new THREE.BoxGeometry(width, hairHeight, depth),
         new THREE.MeshStandardMaterial({ color: color_hair })
       );
+this.hairBox.castShadow=true
+      this.hairBox.receiveShadow=true
 
       // Position the boxes relative to each other
       this.bottomBox.position.y = block_height/2;
