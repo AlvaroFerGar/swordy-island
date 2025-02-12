@@ -3,8 +3,50 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import Box from "./box.js";
 import Pirate from "./pirate.js";
-import isPointInPolygon from "./polyutils.js"
+import { isPointInPolygon, createGrid } from "./polyutils.js"
+import  aStar  from "./astarisborn.js"
 
+
+function loadSVG(url,scene) {
+  return new Promise((resolve, reject) => {
+    const loader = new SVGLoader();
+    loader.load('assets/swordyisland.svg', function (data) {
+      // Extract the paths from the SVG data
+      const paths = data.paths;
+      
+      // Find the first path and extract points (assuming it's a polygon)
+      const points = paths[0].toShapes()[0].getPoints();  // Convert path to shapes and get the points
+      const scale_x=1/2*-1
+      const offset_x=0
+      const scale_y=1/2*-1
+      const offset_y=0
+      let ground_polygon_vertices = points.map(p => [p.y*scale_x+offset_x, p.x*scale_y+offset_y]);
+    
+      // Now create the shape from the extracted points
+      const shape = new THREE.Shape();
+      ground_polygon_vertices.forEach((p, i) => {
+        if (i === 0) shape.moveTo(p[0], p[1]);
+        else shape.lineTo(p[0], p[1]);
+      });
+      shape.lineTo(ground_polygon_vertices[0][0], ground_polygon_vertices[0][1]); // Close the shape
+    
+      const extrudeSettings = { steps: 1, depth: 2, bevelEnabled: false };
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      const material = new THREE.MeshStandardMaterial({ color: 0x185452 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      ground_polygon_vertices = ground_polygon_vertices.map(p => [p[0], -p[1]])//Chanigng symbol in zs as we have rotated
+      mesh.position.y = -2;
+      mesh.receiveShadow = true;
+      mesh.castShadow = true;
+      scene.add(mesh);
+
+      resolve(ground_polygon_vertices)
+    });
+  });
+}
+async function main()
+{
 ///Scene
 const scene = new THREE.Scene();
 
@@ -147,39 +189,25 @@ window.addEventListener("keyup", (event) => {
 
 
 ///Ground
-let ground_polygon_vertices = []
-const loader = new SVGLoader();
-loader.load('assets/swordyisland.svg', function (data) {
-  // Extract the paths from the SVG data
-  const paths = data.paths;
-  
-  // Find the first path and extract points (assuming it's a polygon)
-  const points = paths[0].toShapes()[0].getPoints();  // Convert path to shapes and get the points
-  const scale_x=-1/2
-  const offset_x=0
-  const scale_y=1/2
-  const offset_y=0
-  ground_polygon_vertices = points.map(p => [p.x*scale_x+offset_x, p.y*scale_y+offset_y]);
+console.log("Cargando SVG...");
+const ground_polygon_vertices = await loadSVG('assets/swordyisland.svg',scene);
+console.log("Carga completada");
+//console.log(ground_polygon_vertices)
+let grid = createGrid(ground_polygon_vertices, 1, scene); // Create grid with spacing of 1
 
-  // Now create the shape from the extracted points
-  const shape = new THREE.Shape();
-  ground_polygon_vertices.forEach((p, i) => {
-    if (i === 0) shape.moveTo(p[0], p[1]);
-    else shape.lineTo(p[0], p[1]);
-  });
-  shape.lineTo(ground_polygon_vertices[0][0], ground_polygon_vertices[0][1]); // Close the shape
-
-  const extrudeSettings = { steps: 1, depth: 2, bevelEnabled: false };
-  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  const material = new THREE.MeshStandardMaterial({ color: 0x185452 });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.rotation.x = -Math.PI / 2;
-  ground_polygon_vertices = ground_polygon_vertices.map(p => [p[0], -p[1]])//Chanigng symbol in zs as we have rotated
-  mesh.position.y = -2;
-  mesh.receiveShadow = true;
-  mesh.castShadow = true;
-  scene.add(mesh);
-});
+//grid.forEach(point => {
+//  scene.add(new Box({
+//    width: 0.3,
+//    height: 0.3,
+//    depth: 0.3,
+//    color: "#ffffff",
+//    position: {
+//      x: point.x,
+//      y: 10,
+//      z: point.y,
+//    },
+//   }));
+//});
 
 // const shadowground = new THREE.Mesh(
 //   new THREE.PlaneGeometry(1000, 1000),
@@ -317,16 +345,33 @@ window.addEventListener("click", (event) => {
   const intersection = new THREE.Vector3();
   raycaster.ray.intersectPlane(plane, intersection);
 
-  //console.log(`Clicked at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
-  console.log(`[${intersection.x}, ${intersection.z}],`);
+  console.log(`Clicked at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
+  //console.log(`[${intersection.x}, ${intersection.z}],`);
 
-
+  console.log(ground_polygon_vertices)
   if(isPointInPolygon(intersection,ground_polygon_vertices))
   {
     //Added clicked position to pirate
-    pirate.hasPositionGoal=true;
-    pirate.xGoal=intersection.x;
-    pirate.zGoal=intersection.z;
+    //pirate.hasPositionGoal=true;
+    //pirate.xGoal=intersection.x;
+    //pirate.zGoal=intersection.z;
+
+
+    console.log("*")
+    // Redondear posiciones al entero más cercano
+    let startX = Math.round(pirate.position.x);
+    let startZ = Math.round(pirate.position.z);
+    let endX = Math.round(intersection.x);
+    let endZ = Math.round(intersection.z);
+
+    //let path = aStar([startX, startZ], [endX, endZ], grid);
+   //console.log(endX+"  "+endZ)
+    let path = aStar( {x: startX, y: startZ},  {x: endX, y: endZ}, grid);
+
+    console.log(path);
+
+    pirate.path=path
+    pirate.hasPath=true
   }
   //Debug tool to have feedback of clicks
   // scene.add(new Box({
@@ -369,3 +414,9 @@ function animate() {
   frames++;
 }
 animate();
+
+
+}
+
+
+main();

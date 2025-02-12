@@ -21,11 +21,10 @@ export function checkIntersection(x, y, x1, y1, x2, y2) {
 
 
 
-export default function isPointInPolygon(point, polygon) {
+export function isPointInPolygon(point, polygon) {
     // point is [x, y]
     // polygon is array of [x, y] points
     //https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
-    console.log("llamaron")
     const x = point.x;
     const y = point.z;//As z is 
 
@@ -48,4 +47,35 @@ export default function isPointInPolygon(point, polygon) {
     }
     
     return inside;
+}
+
+export function createGrid(polygon, spacing) {
+    let grid = [];
+
+    if (!polygon || polygon.length === 0) {
+        throw new Error("El polígono está vacío o no es válido.");
+    }
+    let minX = Math.min(...polygon.map(p => p[0]));
+    let maxX = Math.max(...polygon.map(p => p[0]));
+    let minY = Math.min(...polygon.map(p => p[1]));
+    let maxY = Math.max(...polygon.map(p => p[1]));
+
+console.log(minX)
+console.log(maxX)
+console.log(minY)
+console.log(maxY)
+
+minX=-100
+maxX=100
+minY=-100
+maxY=100
+
+    for (let x = minX; x <= maxX; x += spacing) {
+        for (let y = minY; y <= maxY; y += spacing) {
+            if (isPointInPolygon({x: x, z: y}, polygon)) {
+                grid.push({x: x, y: y});
+        }
+    }
+    }
+    return grid;
 }

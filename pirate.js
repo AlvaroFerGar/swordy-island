@@ -33,7 +33,7 @@ export default class Pirate extends THREE.Group {
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color: color_legs })
       );
-this.bottomBox.castShadow=true
+      this.bottomBox.castShadow=true
       this.bottomBox.receiveShadow=true
       
       // Middle box (body) - Blue
@@ -41,7 +41,7 @@ this.bottomBox.castShadow=true
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color: color_body })
       );
-this.middleBox.castShadow=true
+      this.middleBox.castShadow=true
       this.middleBox.receiveShadow=true
       
       // Top box (head) - Beige
@@ -49,14 +49,14 @@ this.middleBox.castShadow=true
         new THREE.BoxGeometry(width, block_height, depth),
         new THREE.MeshStandardMaterial({ color:  color_face})
       );
-this.topBox.castShadow=true
+      this.topBox.castShadow=true
       this.topBox.receiveShadow=true
   
       this.hairBox = new THREE.Mesh(
         new THREE.BoxGeometry(width, hairHeight, depth),
         new THREE.MeshStandardMaterial({ color: color_hair })
       );
-this.hairBox.castShadow=true
+      this.hairBox.castShadow=true
       this.hairBox.receiveShadow=true
 
       // Position the boxes relative to each other
@@ -89,6 +89,9 @@ this.hairBox.castShadow=true
       this.hasPositionGoal=false;
       this.xGoal=0
       this.zGoal=0
+
+      this.hasPath=false;
+      this.path=[]
   
       // Initialize sides (based on bottom box position)
       this.updateSides();
@@ -114,22 +117,41 @@ this.hairBox.castShadow=true
       this.pathPlanning();
 
     }
+    pathPlanning() {
+      const movement_increment = 0.25;
   
-    pathPlanning()
-    {
-      const movement_increment=0.5
-
-      const reached_x=Math.abs(this.position.x-this.xGoal)<movement_increment*3
-      const reached_z=Math.abs(this.position.z-this.zGoal)<movement_increment*3
-      if (this.hasPositionGoal)
-        {
-          console.log("tengo un objetivo");
-          this.position.x += (reached_x)?0:Math.sign(this.xGoal - this.position.x) * movement_increment;
-          this.position.z += (reached_z)?0:Math.sign(this.zGoal - this.position.z) * movement_increment;
-        }
-      if( reached_x && reached_z)
-          this.hasPositionGoal=false;
-    }
+      // Si hay un camino y no hemos llegado al final
+      if (this.path && this.path.length > 0) {
+          // Obtener el siguiente punto del camino
+          const nextPoint = this.path[0];
+  
+          // Actualizar el objetivo actual
+          this.xGoal = nextPoint.x;
+          this.zGoal = nextPoint.y; // Nota: Asegúrate de que el camino use {x, y} o {x, z}
+  
+          // Verificar si el pirata ha alcanzado el punto actual
+          const reached_x = Math.abs(this.position.x - this.xGoal) < movement_increment*0.5;
+          const reached_z = Math.abs(this.position.z - this.zGoal) < movement_increment*0.5;
+  
+          if (reached_x && reached_z) {
+              // Si el pirata ha alcanzado el punto, avanzar al siguiente punto del camino
+              this.path.shift(); // Eliminar el punto actual del camino
+              if (this.path.length === 0) {
+                  // Si no hay más puntos, detener el movimiento
+                  this.hasPositionGoal = false;
+                  console.log("¡El pirata ha llegado a su destino!");
+              }
+          } else {
+              // Mover el pirata hacia el punto actual
+              this.position.x += (reached_x) ? 0 : Math.sign(this.xGoal - this.position.x) * movement_increment;
+              this.position.z += (reached_z) ? 0 : Math.sign(this.zGoal - this.position.z) * movement_increment;
+          }
+      } else {
+          // Si no hay camino, detener el movimiento
+          this.hasPositionGoal = false;
+          console.log("No hay camino o el camino ha terminado.");
+      }
+  }
   }
   
   // Keep the boxCollision function unchanged
