@@ -25,7 +25,11 @@ class AStarNode {
 // Manhattan distance heuristic: estimates cost between two points
 // by calculating total horizontal and vertical distance
 export function heuristic(a, b) {
-    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    const dx = Math.abs(a.x - b.x);
+    const dy = Math.abs(a.y - b.y);
+    const D = 1;        // Cost of straight movement
+    const D2 = Math.SQRT2;  // Cost of diagonal movement
+    return D * (dx + dy) + (D2 - 2 * D) * Math.min(dx, dy);
 }
 
 export default function aStar(startPos, goalPos, grid) {
@@ -105,8 +109,14 @@ export default function aStar(startPos, goalPos, grid) {
 function getNeighbors(node, nodesMap) {
     // Define the four possible directions: right, left, down, up
     const directions = [
-        {x: 1, y: 0}, {x: -1, y: 0},
-        {x: 0, y: 1}, {x: 0, y: -1}
+        {x: 1, y: 0},   // right
+        {x: -1, y: 0},  // left
+        {x: 0, y: 1},   // down
+        {x: 0, y: -1},  // up
+        {x: 1, y: 1},   // diagonal right-down
+        {x: -1, y: 1},  // diagonal left-down
+        {x: 1, y: -1},  // diagonal right-up
+        {x: -1, y: -1}  // diagonal left-up
     ];
 
     // Create and filter neighbors
