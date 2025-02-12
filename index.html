@@ -1,23 +1,32 @@
-<style>
-  body {
-    margin: 0;
-    background: #051a27;
-  }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swordy Island</title>
+  <link rel="stylesheet" href="style.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    Deep in the Caribbean
+  </div>
 
-<script
-  async
-  src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
-></script>
+  <!-- ES Module Shims for older browsers -->
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+  <!-- Import Map for Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+      }
     }
-  }
-</script>
+  </script>
 
-<script type="module" src="box.js"></script>
-<script type="module" src="main.js"></script>
+  <!-- Your JavaScript Modules -->
+  <script type="module" src="box.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

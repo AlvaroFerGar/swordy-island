@@ -7,6 +7,9 @@ import { isPointInPolygon, createGrid } from "./polyutils.js"
 import  aStar  from "./astarisborn.js"
 
 
+// Get the loading screen element
+const loadingScreen = document.getElementById('loading-screen');
+
 function loadSVG(url,scene) {
   return new Promise((resolve, reject) => {
     const loader = new SVGLoader();
@@ -187,13 +190,19 @@ window.addEventListener("keyup", (event) => {
 });
 
 
-
+const loadingPromise = new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds delay
 ///Ground
 console.log("Cargando SVG...");
 const ground_polygon_vertices = await loadSVG('assets/swordyisland.svg',scene);
 console.log("Carga completada");
 //console.log(ground_polygon_vertices)
 let grid = createGrid(ground_polygon_vertices, 1, scene); // Create grid with spacing of 1
+
+
+  // Wait for both the loading promise and the asset loading to complete
+  await loadingPromise;
+  // Hide the loading screen once everything is loaded
+  loadingScreen.classList.add('hidden');
 
 //grid.forEach(point => {
 //  scene.add(new Box({

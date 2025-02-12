@@ -1,0 +1,32 @@
+@font-face {
+    font-family: 'Scumm-Solid'; /* Name your font */
+    src: url('assets/lucasarts-scumm-solid.otf') format('opentype'); /* Path to your font file */
+    font-weight: normal;
+    font-style: normal;
+  }
+
+
+body {
+    margin: 0;
+    background: #051a27;
+  }
+
+  #loading-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #E757E5;
+    font-size: 6em;
+    font-family: 'Scumm-Solid', Arial, sans-serif;
+    z-index: 1000;
+  }
+
+  #loading-screen.hidden {
+    display: none;
+  }
