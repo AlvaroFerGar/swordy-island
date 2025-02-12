@@ -19,7 +19,7 @@ function loadSVG(url,scene) {
       const scale_x=1/2*-1
       const offset_x=0
       const scale_y=1/2*-1
-      const offset_y=0
+      const offset_y=-30
       let ground_polygon_vertices = points.map(p => [p.y*scale_x+offset_x, p.x*scale_y+offset_y]);
     
       // Now create the shape from the extracted points
@@ -57,7 +57,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(-10, 50, 0);
+camera.position.set(-10, 100, 0);
 camera.lookAt(0, 0, 0); // Look at center
 
 //Renderer
@@ -83,8 +83,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 
 ///Lights
 const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.y = 10;
-light.position.z = camera.position.z-20;
+light.position.y = 4;
+light.position.x = camera.position.x-20;
 light.castShadow = true;
 light.shadow.bias = -0.005;  // Adjust as needed
 scene.add(light);
@@ -101,7 +101,7 @@ scene.add(citylight);
 let cityhelper = new THREE.PointLightHelper(citylight, 2);
 citylight.add(cityhelper)
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 // Crear edificios (prismas) pequeños y de color amarillento
 function createBuilding(x, y, z, width, height, depth) {
   const geometry = new THREE.BoxGeometry(width, height, depth);
