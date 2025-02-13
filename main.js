@@ -5,6 +5,7 @@ import Box from "./box.js";
 import Pirate from "./pirate.js";
 import { isPointInPolygon, createGrid } from "./polyutils.js"
 import  aStar  from "./astarisborn.js"
+import { createBoxBuilding, createCircularHouse, createCityLight } from "./buildings.js";
 
 
 // Get the loading screen element
@@ -95,34 +96,46 @@ let helper = new THREE.DirectionalLightHelper(light, 5);
 light.add(helper)
 
 
-
-const citylight = new THREE.PointLight(0xffbf00, 5,5);
-citylight.position.set(0, 0.5, 0)
-
-citylight.castShadow = true;
-scene.add(citylight);
-let cityhelper = new THREE.PointLightHelper(citylight, 2);
-citylight.add(cityhelper)
-
 scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-// Crear edificios (prismas) pequeños y de color amarillento
-function createBuilding(x, y, z, width, height, depth) {
-  const geometry = new THREE.BoxGeometry(width, height, depth);
-  const material = new THREE.MeshLambertMaterial({ color: 0xffe066 }); // Color amarillento
-  const building = new THREE.Mesh(geometry, material);
-  building.position.set(x, y, z);
-  building.castShadow = true;
-  building.receiveShadow = true;
-  scene.add(building);
-}
 
-// Añadir algunos edificios
-createBuilding(1, 0, 2, 1, 1, 1); // Primer edificio
-createBuilding(-1, 0, -1, 1, 1, 1); // Segundo edificio
-createBuilding(0, 0, -3, 1, 1, 1); // Tercer edificio
-createBuilding(0.5, 0.5, 2, 1, 1, 1); // Primer edificio
-createBuilding(-2, 0, -1, 1, 1, 1); // Segundo edificio
-createBuilding(0.5, 0.75, -3, 1, 1, 1); // Tercer edificio
+
+//Town
+const x_town=-19
+const z_town=-17
+createCityLight(scene, x_town, 0.5, z_town);
+createBoxBuilding(scene, x_town+1, 0, z_town+2, 1, 1, 1);
+
+
+//MeatHook
+const x_mh=39
+const z_mh=63
+createCityLight(scene, x_mh, 0.5, z_mh);
+createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
+
+//Smirk
+const x_cs=-28
+const z_cs=78
+createCityLight(scene, x_cs, 0.5, z_cs);
+createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
+
+//Circus
+const x_cir=3
+const z_cir=20
+createCityLight(scene, x_cir, 0.5, z_cir, 0xff0000);
+createCircularHouse(scene, x_cir, 0, z_cir, 1, 1, 1, 0xff0000, 0xff0000)
+//createBoxBuilding(scene, x_cir, 0, z_cir, 1, 1, 1, 0xff0000);
+
+//Shipyard
+const x_stan=-29
+const z_stan=38
+createCityLight(scene, x_stan, 2, z_stan);
+createBoxBuilding(scene, x_stan, 0, z_stan, 3, 1, 3, 0xff0000);
+
+//LightHouse
+const x_lh=22
+const z_lh=-42
+createCityLight(scene, x_lh, 0.5, z_lh);
+createBoxBuilding(scene, x_lh, 0, x_lh, 1, 1, 1);
 
 ///Pirate
 const pirate = new Pirate({
