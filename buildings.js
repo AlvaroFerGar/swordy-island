@@ -60,13 +60,15 @@ export function createCircularHouse(scene, x, y, z, radius, wallHeight, roofHeig
     return house;
 }
 
-export function createCityLight(scene, x, y, z,colorhex=0xffb61e) {
+export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, distance=5, shownhelper=false) {
     const citylight = new THREE.PointLight(colorhex, 5, 5);
     citylight.position.set(x, y, z);
     citylight.castShadow = true;
-    let cityhelper = new THREE.PointLightHelper(citylight, 2);
-    citylight.add(cityhelper);
-
+    if(shownhelper)
+    {
+        let cityhelper = new THREE.PointLightHelper(citylight, 2);
+        citylight.add(cityhelper);
+    }
     
     scene.add(citylight);
 

@@ -51,6 +51,12 @@ function loadSVG(url,scene) {
 }
 async function main()
 {
+
+
+
+
+const helpers_shown=false;
+
 ///Scene
 const scene = new THREE.Scene();
 
@@ -93,7 +99,8 @@ light.castShadow = true;
 light.shadow.bias = -0.005;  // Adjust as needed
 scene.add(light);
 let helper = new THREE.DirectionalLightHelper(light, 5);
-light.add(helper)
+if(helpers_shown)
+  light.add(helper)
 
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.3));
@@ -102,40 +109,71 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 //Town
 const x_town=-19
 const z_town=-17
-createCityLight(scene, x_town, 0.5, z_town);
+createCityLight(scene, x_town, 0.5, z_town, helpers_shown);
 createBoxBuilding(scene, x_town+1, 0, z_town+2, 1, 1, 1);
 
 
 //MeatHook
 const x_mh=39
 const z_mh=63
-createCityLight(scene, x_mh, 0.5, z_mh);
+createCityLight(scene, x_mh, 0.5, z_mh, helpers_shown);
 createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
 
 //Smirk
 const x_cs=-28
 const z_cs=78
-createCityLight(scene, x_cs, 0.5, z_cs);
+createCityLight(scene, x_cs, 0.5, z_cs, helpers_shown);
 createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
 
 //Circus
 const x_cir=3
 const z_cir=20
-createCityLight(scene, x_cir, 0.5, z_cir, 0xff0000);
-createCircularHouse(scene, x_cir, 0, z_cir, 1, 1, 1, 0xff0000, 0xff0000)
+const cir_radius=1
+createCircularHouse(scene, x_cir, 0, z_cir, cir_radius, 1, 1, 0xff0000, 0xff0000)
+createCircularHouse(scene, x_cir-1, 0, z_cir-1, cir_radius, 1, 1, 0xff0000, 0xff0000)
+
+createCityLight(scene, x_cir+cir_radius, 0.5, z_cir+cir_radius, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir+cir_radius, 0.5, z_cir-cir_radius, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir-cir_radius, 0.5, z_cir+cir_radius, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir-cir_radius, 0.5, z_cir-cir_radius, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir+cir_radius-1, 0.5, z_cir+cir_radius-1, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir+cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir+cir_radius-1, 0xff0000, 10,10, helpers_shown);
+createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10,10, helpers_shown);
+
 //createBoxBuilding(scene, x_cir, 0, z_cir, 1, 1, 1, 0xff0000);
 
 //Shipyard
 const x_stan=-29
 const z_stan=38
-createCityLight(scene, x_stan, 2, z_stan);
+createCityLight(scene, x_stan, 2, z_stan, helpers_shown);
 createBoxBuilding(scene, x_stan, 0, z_stan, 3, 1, 3, 0xff0000);
 
 //LightHouse
 const x_lh=22
 const z_lh=-42
-createCityLight(scene, x_lh, 0.5, z_lh);
-createBoxBuilding(scene, x_lh, 0, x_lh, 1, 1, 1);
+const lh_height=4
+const lh_roofheight=.2
+createCityLight(scene, x_lh, 0.5, z_lh, helpers_shown);
+createCircularHouse(scene, x_lh, 0, z_lh, 0.5, lh_height, lh_roofheight, 0xffffff, 0xffffff)
+
+// Configurar la luz del faro
+const light_lh = new THREE.SpotLight(0xffffff, 2, 200, Math.PI / 6, 0.2, 1);
+light_lh.position.set(x_lh, lh_height+lh_roofheight-2, z_lh-1);
+light_lh.target.position.set(x_lh, 0, -200);
+light_lh.castShadow = true;
+light_lh.shadow.bias = -0.005;
+scene.add(light_lh);
+scene.add(light_lh.target);
+
+const helper_lh = new THREE.SpotLightHelper(light_lh);
+if(helpers_shown)
+  scene.add(helper_lh);
+
+
+
+
+
 
 ///Pirate
 const pirate = new Pirate({
@@ -203,7 +241,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 
-const loadingPromise = new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds delay
+const loadingPromise = new Promise((resolve) => setTimeout(resolve, 1)); // 3 seconds delay
 ///Ground
 console.log("Cargando SVG...");
 const ground_polygon_vertices = await loadSVG('assets/swordyisland.svg',scene);
@@ -432,6 +470,11 @@ function animate() {
 
   ocean.update();
 
+
+  light_lh.target.position.x = x_lh + Math.sin(Date.now() * 0.001) * 50;
+  light_lh.target.position.z = -200 + Math.cos(Date.now() * 0.001) * 50;
+  light_lh.target.updateMatrixWorld();
+  helper_lh.update();
 
   frames++;
 }
