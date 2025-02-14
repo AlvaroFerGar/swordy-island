@@ -5,7 +5,7 @@ import Box from "./box.js";
 import Pirate from "./pirate.js";
 import { isPointInPolygon, createGrid } from "./polyutils.js"
 import  aStar  from "./astarisborn.js"
-import { createBoxBuilding, createCircularHouse, createCityLight } from "./buildings.js";
+import { createBoxBuilding, createCircularHouse, createCityLight, createBoatBuilding } from "./buildings.js";
 
 
 // Get the loading screen element
@@ -109,20 +109,26 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 //Town
 const x_town=-19
 const z_town=-17
-createCityLight(scene, x_town, 0.5, z_town, helpers_shown);
+createCityLight(scene, x_town, 0.5, z_town,
+  0xffa400,
+  5,5,helpers_shown);
 createBoxBuilding(scene, x_town+1, 0, z_town+2, 1, 1, 1);
 
 
 //MeatHook
 const x_mh=39
 const z_mh=63
-createCityLight(scene, x_mh, 0.5, z_mh, helpers_shown);
+createCityLight(scene, x_mh, 0.5, z_mh,
+  0xffa400,
+  5,5,helpers_shown);
 createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
 
 //Smirk
 const x_cs=-28
 const z_cs=78
-createCityLight(scene, x_cs, 0.5, z_cs, helpers_shown);
+createCityLight(scene, x_cs, 0.5, z_cs,
+  0xffa400,
+  5,5,helpers_shown);
 createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
 
 //Circus
@@ -141,23 +147,68 @@ createCityLight(scene, x_cir+cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10
 createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir+cir_radius-1, 0xff0000, 10,10, helpers_shown);
 createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10,10, helpers_shown);
 
-//createBoxBuilding(scene, x_cir, 0, z_cir, 1, 1, 1, 0xff0000);
 
 //Shipyard
 const x_stan=-29
 const z_stan=38
-createCityLight(scene, x_stan, 2, z_stan, helpers_shown);
-createBoxBuilding(scene, x_stan, 0, z_stan, 3, 1, 3, 0xff0000);
+createCityLight(scene, x_stan, 2, z_stan,
+  0xff0000,
+  5,5,helpers_shown);
+
+createBoxBuilding(scene, x_stan, 0, z_stan,       1, 1, 1, 0xff0000);
+
+createBoxBuilding(scene, x_stan+1, 0, z_stan-1,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan+1, 0, z_stan+1,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan-1, 0, z_stan-1,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan-1, 0, z_stan,     0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan-1, 0, z_stan+1,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan+0.5, 0, z_stan+1.5,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan+0.5, 0, z_stan-1.5,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan-1, 0, z_stan+2,   0.5, 1, 0.5, 0xff0000);
+createBoxBuilding(scene, x_stan-1, 0, z_stan-2,   0.5, 1, 0.5, 0xff0000);
+
+const boats_y=-2*0.8
+createBoatBuilding(
+  scene, 
+  x_stan+4, boats_y, z_stan+4,                   // position
+  1.5, 0.7, 3,                   // hull dimensions
+  1.5, 3, 0.15,                   // sail dimensions
+  0x694629, 0xf0f0f0          // hull and sail colors
+);
+createBoatBuilding(
+  scene, 
+  x_stan+6, boats_y, z_stan+4,                   // position
+  1.5, 0.7, 3,                   // hull dimensions
+  1.5, 3, 0.15,                   // sail dimensions
+  0x694629, 0xf0f0f0          // hull and sail colors
+);
+
+createBoatBuilding(
+  scene, 
+  x_stan+4, boats_y-0.1, z_stan+8,                   // position
+  1.5, 0.7, 3,                   // hull dimensions
+  1.5, 3, 0.15,                   // sail dimensions
+  0x694629, 0xf0f0f0          // hull and sail colors
+);
+createBoatBuilding(
+  scene, 
+  x_stan+2, boats_y-0.1, z_stan+8,                   // position
+  1.5, 0.7, 3,                   // hull dimensions
+  1.5, 3, 0.15,                   // sail dimensions
+  0x694629, 0xf0f0f0          // hull and sail colors
+);
+
+
 
 //LightHouse
 const x_lh=22
 const z_lh=-42
 const lh_height=4
 const lh_roofheight=.2
-createCityLight(scene, x_lh, 0.5, z_lh, helpers_shown);
+createCityLight(scene, x_lh, 0.5, z_lh, 0xffa400,
+  5,5,helpers_shown);
 createCircularHouse(scene, x_lh, 0, z_lh, 0.5, lh_height, lh_roofheight, 0xffffff, 0xffffff)
 
-// Configurar la luz del faro
 const light_lh = new THREE.SpotLight(0xffffff, 2, 200, Math.PI / 6, 0.2, 1);
 light_lh.position.set(x_lh, lh_height+lh_roofheight-2, z_lh-1);
 light_lh.target.position.set(x_lh, 0, -200);

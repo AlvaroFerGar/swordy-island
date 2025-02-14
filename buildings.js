@@ -60,7 +60,37 @@ export function createCircularHouse(scene, x, y, z, radius, wallHeight, roofHeig
     return house;
 }
 
+// Create a boat building (hull + sail)
+export function createBoatBuilding(scene, x, y, z, 
+    hullWidth = 2, hullHeight = 1, hullDepth = 4, 
+    sailWidth = 0.2, sailHeight = 3, sailDepth = 2,
+    hullColorhex = 0x8b4513, sailColorhex = 0xffffff) {
+    
+    // Create a group to hold both parts
+    const boat = new THREE.Group();
+    
+    // Create the hull using BoxGeometry
+    const hullGeometry = new THREE.BoxGeometry(hullWidth, hullHeight, hullDepth);
+    const hull = createBaseMesh(scene, hullGeometry, 0, 0, 0, hullColorhex);
+    
+    // Create the sail using BoxGeometry
+    const sailGeometry = new THREE.BoxGeometry(sailWidth, sailHeight, sailDepth);
+    const sail = createBaseMesh(scene, sailGeometry, 0, (hullHeight + sailHeight) / 2, 0, sailColorhex);
+    
+    // Add parts to group
+    boat.add(hull);
+    boat.add(sail);
+    
+    // Position the entire boat
+    boat.position.set(x, y, z);
+    scene.add(boat);
+    
+    return boat;
+}
+
 export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, distance=5, shownhelper=false) {
+    
+    console.log("luz:"+colorhex)
     const citylight = new THREE.PointLight(colorhex, 5, 5);
     citylight.position.set(x, y, z);
     citylight.castShadow = true;
