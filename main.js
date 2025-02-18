@@ -106,9 +106,13 @@ if(helpers_shown)
 scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 
+//Cities
+const cities=[];
+
 //Town
 const x_town=-19
 const z_town=-17
+cities.push({x_town,z_town})
 createCityLight(scene, x_town, 0.5, z_town,
   0xffa400,
   5,5,helpers_shown);
@@ -118,6 +122,7 @@ createBoxBuilding(scene, x_town+1, 0, z_town+2, 1, 1, 1);
 //MeatHook
 const x_mh=39
 const z_mh=63
+cities.push({x_mh,z_mh})
 createCityLight(scene, x_mh, 0.5, z_mh,
   0xffa400,
   5,5,helpers_shown);
@@ -126,6 +131,7 @@ createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
 //Smirk
 const x_cs=-28
 const z_cs=78
+cities.push({x_cs,z_cs})
 createCityLight(scene, x_cs, 0.5, z_cs,
   0xffa400,
   5,5,helpers_shown);
@@ -134,6 +140,7 @@ createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
 //Circus
 const x_cir=3
 const z_cir=20
+cities.push({x_cir,z_cir})
 const cir_radius=1
 createCircularHouse(scene, x_cir, 0, z_cir, cir_radius, 1, 1, 0xff0000, 0xff0000)
 createCircularHouse(scene, x_cir-1, 0, z_cir-1, cir_radius, 1, 1, 0xff0000, 0xff0000)
@@ -151,9 +158,10 @@ createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10
 //Shipyard
 const x_stan=-29
 const z_stan=38
-createCityLight(scene, x_stan, 2, z_stan,
+cities.push({x_stan,z_stan})
+createCityLight(scene, x_stan, 0.5, z_stan,
   0xff0000,
-  5,5,helpers_shown);
+  500,500,true);
 
 createBoxBuilding(scene, x_stan, 0, z_stan,       1, 1, 1, 0xff0000);
 
@@ -203,6 +211,7 @@ createBoatBuilding(
 //LightHouse
 const x_lh=22
 const z_lh=-42
+cities.push({x_lh,z_lh})
 const lh_height=4
 const lh_roofheight=.2
 createCityLight(scene, x_lh, 0.5, z_lh, 0xffa400,
@@ -227,7 +236,7 @@ if(helpers_shown)
 
 
 ///Pirate
-const pirate = new Pirate({
+const guyblock = new Pirate({
   width: 1,
   block_height: 1,
   depth: 1,
@@ -237,8 +246,8 @@ const pirate = new Pirate({
     z: 0,
   },
 });
-pirate.castShadow = true;
-scene.add(pirate);
+guyblock.castShadow = true;
+scene.add(guyblock);
 const keys = {
   a: {
     pressed: false,
@@ -269,7 +278,7 @@ window.addEventListener("keydown", (event) => {
       keys.w.pressed = true;
       break;
     case "Space":
-      pirate.velocity.y = 0.08;
+      guyblock.velocity.y = 0.08;
       break;
   }
 });
@@ -470,8 +479,8 @@ window.addEventListener("click", (event) => {
 
     console.log("*")
     // Redondear posiciones al entero más cercano
-    let startX = Math.round(pirate.position.x);
-    let startZ = Math.round(pirate.position.z);
+    let startX = Math.round(guyblock.position.x);
+    let startZ = Math.round(guyblock.position.z);
     let endX = Math.round(intersection.x);
     let endZ = Math.round(intersection.z);
 
@@ -481,8 +490,8 @@ window.addEventListener("click", (event) => {
 
     console.log(path);
 
-    pirate.path=path
-    pirate.hasPath=true
+    guyblock.path=path
+    guyblock.hasPath=true
   }
   //Debug tool to have feedback of clicks
   // scene.add(new Box({
@@ -509,14 +518,14 @@ function animate() {
   renderer.render(scene, camera);
 
   // movement code
-  pirate.velocity.x = 0;
-  pirate.velocity.z = 0;
-  if (keys.a.pressed) pirate.velocity.x = -0.05;
-  else if (keys.d.pressed) pirate.velocity.x = 0.05;
+  guyblock.velocity.x = 0;
+  guyblock.velocity.z = 0;
+  if (keys.a.pressed) guyblock.velocity.x = -0.05;
+  else if (keys.d.pressed) guyblock.velocity.x = 0.05;
 
-  if (keys.s.pressed) pirate.velocity.z = 0.05;
-  else if (keys.w.pressed) pirate.velocity.z = -0.05;
-  pirate.update();
+  if (keys.s.pressed) guyblock.velocity.z = 0.05;
+  else if (keys.w.pressed) guyblock.velocity.z = -0.05;
+  guyblock.update();
 
 
   ocean.update();
