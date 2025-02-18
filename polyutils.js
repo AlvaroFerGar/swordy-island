@@ -60,10 +60,10 @@ export function createGrid(polygon, spacing) {
     let minY = Math.min(...polygon.map(p => p[1]));
     let maxY = Math.max(...polygon.map(p => p[1]));
 
-console.log(minX)
-console.log(maxX)
-console.log(minY)
-console.log(maxY)
+//console.log(minX)
+//console.log(maxX)
+//console.log(minY)
+//console.log(maxY)
 
 minX=-100
 maxX=100

@@ -67,7 +67,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(-10, 100, 0);
+camera.position.set(-40, 80, 0);
 camera.lookAt(0, 0, 0); // Look at center
 
 //Renderer
@@ -94,7 +94,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 ///Lights
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.y = 4;
-light.position.x = camera.position.x-20;
+light.position.x = camera.position.x-200;
+light.position.z = camera.position.z-200;
 light.castShadow = true;
 light.shadow.bias = -0.005;  // Adjust as needed
 scene.add(light);
@@ -107,12 +108,12 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 
 //Cities
-const cities=[];
+const cities_points=[];
 
 //Town
 const x_town=-19
 const z_town=-17
-cities.push({x_town,z_town})
+cities_points.push({x:x_town,z:z_town})
 createCityLight(scene, x_town, 0.5, z_town,
   0xffa400,
   5,5,helpers_shown);
@@ -122,7 +123,7 @@ createBoxBuilding(scene, x_town+1, 0, z_town+2, 1, 1, 1);
 //MeatHook
 const x_mh=39
 const z_mh=63
-cities.push({x_mh,z_mh})
+cities_points.push({x:x_mh,z:z_mh})
 createCityLight(scene, x_mh, 0.5, z_mh,
   0xffa400,
   5,5,helpers_shown);
@@ -131,7 +132,7 @@ createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
 //Smirk
 const x_cs=-28
 const z_cs=78
-cities.push({x_cs,z_cs})
+cities_points.push({x:x_cs,z:z_cs})
 createCityLight(scene, x_cs, 0.5, z_cs,
   0xffa400,
   5,5,helpers_shown);
@@ -140,7 +141,7 @@ createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
 //Circus
 const x_cir=3
 const z_cir=20
-cities.push({x_cir,z_cir})
+cities_points.push({x:x_cir,z:z_cir})
 const cir_radius=1
 createCircularHouse(scene, x_cir, 0, z_cir, cir_radius, 1, 1, 0xff0000, 0xff0000)
 createCircularHouse(scene, x_cir-1, 0, z_cir-1, cir_radius, 1, 1, 0xff0000, 0xff0000)
@@ -158,7 +159,7 @@ createCityLight(scene, x_cir-cir_radius-1, 0.5, z_cir-cir_radius-1, 0xff0000, 10
 //Shipyard
 const x_stan=-29
 const z_stan=38
-cities.push({x_stan,z_stan})
+cities_points.push({x:x_stan,z:z_stan})
 createCityLight(scene, x_stan, 0.5, z_stan,
   0xff0000,
   500,500,true);
@@ -211,7 +212,7 @@ createBoatBuilding(
 //LightHouse
 const x_lh=22
 const z_lh=-42
-cities.push({x_lh,z_lh})
+cities_points.push({x:x_lh,z:z_lh})
 const lh_height=4
 const lh_roofheight=.2
 createCityLight(scene, x_lh, 0.5, z_lh, 0xffa400,
@@ -237,6 +238,7 @@ if(helpers_shown)
 
 ///Pirate
 const guyblock = new Pirate({
+  id:0,
   width: 1,
   block_height: 1,
   depth: 1,
@@ -246,7 +248,6 @@ const guyblock = new Pirate({
     z: 0,
   },
 });
-guyblock.castShadow = true;
 scene.add(guyblock);
 const keys = {
   a: {
@@ -276,9 +277,6 @@ window.addEventListener("keydown", (event) => {
       break;
     case "KeyW":
       keys.w.pressed = true;
-      break;
-    case "Space":
-      guyblock.velocity.y = 0.08;
       break;
   }
 });
@@ -410,6 +408,8 @@ ocean.receiveShadow = true;
 scene.add(ocean);
 
 
+
+//Eje de coordenadas
   scene.add(new Box({
    width: 1,
    height: 1,
@@ -468,7 +468,7 @@ window.addEventListener("click", (event) => {
   console.log(`Clicked at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
   //console.log(`[${intersection.x}, ${intersection.z}],`);
 
-  console.log(ground_polygon_vertices)
+  //console.log(ground_polygon_vertices)
   if(isPointInPolygon(intersection,ground_polygon_vertices))
   {
     //Added clicked position to pirate
@@ -488,7 +488,7 @@ window.addEventListener("click", (event) => {
    //console.log(endX+"  "+endZ)
     let path = aStar( {x: startX, y: startZ},  {x: endX, y: endZ}, grid);
 
-    console.log(path);
+    //console.log(path);
 
     guyblock.path=path
     guyblock.hasPath=true
@@ -513,6 +513,10 @@ window.addEventListener("click", (event) => {
 
 
 let frames = 0;
+let pirate_list=[]
+let pirate_id=1;
+
+
 function animate() {
   const animationId = requestAnimationFrame(animate);
   renderer.render(scene, camera);
@@ -535,6 +539,105 @@ function animate() {
   light_lh.target.position.z = -200 + Math.cos(Date.now() * 0.001) * 50;
   light_lh.target.updateMatrixWorld();
   helper_lh.update();
+
+  if(pirate_list.length<5)
+  {
+    const colorSets = [
+      {
+          color_legs: '#51b8be', // Negro
+          color_body: '#313dd5', // Blanco
+          color_face: '#59342a', // Piel clara
+          color_hair: '#313dd5'  // Marrón claro
+      },
+      {
+          color_legs: '#aeaea6', // Rojo oscuro
+          color_body: '#e30e0e', // Dorado
+          color_face: '#be9151', // Piel más clara
+          color_hair: '#be9151'  // Gris oscuro
+      },
+      {
+          color_legs: '#183043', // Azul
+          color_body: '#eff210', // Verde oscuro
+          color_face: '#ebb0a0', // Bronceado
+          color_hair: '#ff7e00'  // Marrón oscuro
+      }
+  ];
+
+
+    const selectedColors = colorSets[Math.floor(Math.random() * colorSets.length)];
+    const piratenpc = new Pirate({
+      pirate_id: pirate_id,
+      width: 1,
+      block_height: 1,
+      depth: 1,
+      velocity: {
+        x: 0,
+        y: -0.01,
+        z: 0,
+      },
+      color_hair: selectedColors.color_hair,
+      color_face: selectedColors.color_face,
+      color_body: selectedColors.color_body,
+      color_legs: selectedColors.color_legs
+    });
+    pirate_id=pirate_id+1;
+
+    let cityA_index = Math.floor(Math.random() * cities_points.length);
+    let cityB_index;
+
+    do {
+      cityB_index = Math.floor(Math.random() * cities_points.length);
+    } while (cityA_index === cityB_index); // Ensure different indices
+
+    //console.log(`City A X: ${cities_points[cityA_index].x} Y: ${cities_points[cityA_index].z}`);
+    //console.log(`City B X: ${cities_points[cityB_index].x} Y: ${cities_points[cityB_index].z}`);
+
+    piratenpc.position.set(cities_points[cityA_index].x, 0, cities_points[cityA_index].z);
+    let path = aStar( {x: cities_points[cityA_index].x, y: cities_points[cityA_index].z},  {x: cities_points[cityB_index].x, y: cities_points[cityB_index].z}, grid);
+    //console.log(path);
+    piratenpc.path=path
+    piratenpc.hasPath=true
+    scene.add(piratenpc);
+    pirate_list.push(piratenpc)
+    console.log("Creado pirate "+pirate_id-1)
+  }
+
+  for(let npc of pirate_list)
+  {
+    npc.update();
+
+
+    if ((npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 4)
+    {
+      console.log("Colisión entre Guyblock y pirata #"+npc.pirate_id)
+    }
+
+    if(npc.hasPath===true)
+      continue
+
+    scene.remove(npc);
+
+    // 2. Liberar memoria de materiales y geometría
+    if (npc.geometry) pirate.geometry.dispose();
+    if (npc.material) {
+        if (Array.isArray(npc.material)) {
+          npc.material.forEach(mat => mat.dispose());
+        } else {
+          npc.material.dispose();
+        }
+    }
+
+    // 3. Eliminarlo de la lista pirate_list
+    let index = pirate_list.indexOf(npc);
+    if (index !== -1) {
+        pirate_list.splice(index, 1);
+    }
+
+    console.log("Pirate #"+npc.pirate_id+" removed!");
+
+  }
+
+
 
   frames++;
 }

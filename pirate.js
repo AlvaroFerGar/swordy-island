@@ -3,6 +3,7 @@ import * as THREE from "three";
 
 export default class Pirate extends THREE.Group {
     constructor({
+      pirate_id=0,
       width = 1,
       block_height = 1, // Total height will be divided among the boxes
       depth = 1,
@@ -24,6 +25,14 @@ export default class Pirate extends THREE.Group {
     }) {
       super();
   
+      this.pirate_id=pirate_id
+
+      this.color_hair=color_hair;
+      this.color_face=color_face;
+      this.color_body=color_body;
+      this.color_legs=color_legs;
+
+
       // Create three boxes with different colors
       const pirateHeight = block_height * 3;
       const hairHeight = block_height*0.1;
@@ -138,8 +147,8 @@ export default class Pirate extends THREE.Group {
               this.path.shift(); // Eliminar el punto actual del camino
               if (this.path.length === 0) {
                   // Si no hay más puntos, detener el movimiento
-                  this.hasPositionGoal = false;
-                  console.log("¡El pirata ha llegado a su destino!");
+                  this.hasPath = false;
+                  console.log("¡El pirata #"+this.pirate_id+" ha llegado a su destino!");
               }
           } else {
               // Mover el pirata hacia el punto actual
@@ -148,8 +157,8 @@ export default class Pirate extends THREE.Group {
           }
       } else {
           // Si no hay camino, detener el movimiento
-          this.hasPositionGoal = false;
-          console.log("No hay camino o el camino ha terminado.");
+          this.hasPath = false;
+          //console.log("No hay camino o el camino ha terminado.");
       }
   }
   }
