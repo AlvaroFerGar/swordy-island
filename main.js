@@ -89,37 +89,37 @@ const cities_points=[];
 const x_town=-19
 const z_town=-17
 cities_points.push({x:x_town,z:z_town})
-cities.createCityTown(scene, x_town, z_town, helpers_shown);
+cities.createTown(scene, x_town, z_town, helpers_shown);
 
 //MeatHook
 const x_mh=39
 const z_mh=63
 cities_points.push({x:x_mh,z:z_mh})
-cities.createCityMeathook(scene, x_mh, z_mh, helpers_shown);
+cities.createMeathook(scene, x_mh, z_mh, helpers_shown);
 
 //Smirk
 const x_cs=-28
 const z_cs=78
 cities_points.push({x:x_cs,z:z_cs})
-cities.createCitySmirk(scene, x_cs, z_cs, helpers_shown);
+cities.createCptSmirk(scene, x_cs, z_cs, helpers_shown);
 
 //Circus
 const x_cir=3
 const z_cir=20
 cities_points.push({x:x_cir,z:z_cir})
-cities.createCityCircus(scene, x_cir, z_cir, helpers_shown);
+cities.createCircus(scene, x_cir, z_cir, helpers_shown);
 
 //Shipyard
 const x_stan=-29
 const z_stan=38
 cities_points.push({x:x_stan,z:z_stan})
-cities.createCityShipyard(scene, x_stan, z_stan, helpers_shown);
+let spotlights=cities.createStanShipyard(scene, x_stan, z_stan, helpers_shown);
 
 //LightHouse
 const x_lh=22
 const z_lh=-42
 cities_points.push({x:x_lh,z:z_lh})
-const { light_lh, helper_lh } = cities.createCityLightHouse(scene, x_lh, z_lh, helpers_shown);
+const { light_lh, helper_lh } = cities.createLightHouse(scene, x_lh, z_lh, helpers_shown);
 
 
 
@@ -254,7 +254,7 @@ window.addEventListener("click", (event) => {
 let frames = 0;
 let pirate_list=[]
 let pirate_id=1;
-
+let elapsed_stan_time=0;
 
 function animate() {
   const animationId = requestAnimationFrame(animate);
@@ -267,6 +267,21 @@ function animate() {
 
   light_lh.update()
   helper_lh.update();
+
+
+  const delta = clock.getDelta(); // Get the time since the last frame
+  elapsed_stan_time += delta; // Accumulate elapsed time
+
+  if(elapsed_stan_time>=0.5)
+  {
+  spotlights.sort(() => Math.random() - 0.5);
+  let visibility=spotlights[0].visible;
+  spotlights.forEach(light => {
+    visibility=!visibility;
+    light.visible=visibility
+  });
+  elapsed_stan_time=0;
+  }
 
   if(pirate_list.length<5)
   {

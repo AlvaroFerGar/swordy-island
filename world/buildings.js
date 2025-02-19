@@ -88,9 +88,8 @@ export function createBoatBuilding(scene, x, y, z,
     return boat;
 }
 
-export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, distance=5, shownhelper=false) {
+export function createPointLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, distance=5, shownhelper=false) {
     
-    console.log("luz:"+colorhex)
     const citylight = new THREE.PointLight(colorhex, 5, 5);
     citylight.position.set(x, y, z);
     citylight.castShadow = true;
@@ -104,22 +103,81 @@ export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, d
 
   }
 
-  export function createCityShipyard(scene, x_stan, z_stan,helpers_shown) {
-    createCityLight(scene, x_stan, 0.5, z_stan,
-      0xff0000,
-      500, 500, helpers_shown);
+
+  export function createSpotLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, distance=5, shownhelper=false) {
+    const citylight = new THREE.SpotLight(colorhex, intensity, distance, Math.PI / 32, 1, 128);
+    citylight.position.set(x, y, z);
+    citylight.target.position.set(x, 0, z)
+    citylight.castShadow = true;
+    if(shownhelper)
+    {
+        let cityhelper = new THREE.SpotLightHelper(citylight, 2);
+        citylight.add(cityhelper);
+    }
+    
+    scene.add(citylight);
+    scene.add(citylight.target);
+
+    return citylight;
+  }
+
+  export function createStanShipyard(scene, x_stan, z_stan,helpers_shown) {
+    //createCityLight(scene, x_stan, 1, z_stan,
+    //0xff0000,
+    //  500, 500, helpers_shown);
+
+    const spotLights = [];
+
+    // Colores para alternar
+    const colors = [0xff0000, 0x0000ff];  // Rojo y azul
+    let visible_start=0
+
+
+    let colorIndex = 0;
+    const grid_halfsize=1.25;
+    const grid_step=0.75;
+    for(let x_offset = -1*grid_halfsize; x_offset <= grid_halfsize; x_offset += grid_step) {
+        for(let z_offset = -1*grid_halfsize; z_offset <= grid_halfsize; z_offset += grid_step) {
+            // Crear la luz con el color actual
+            let light=createSpotLight(
+                scene,
+                x_stan + x_offset,
+                6,
+                z_stan + z_offset,
+                colors[colorIndex],
+                2,
+                0
+            );
+
+            //light.visible=visible_start<1;
+            //visible_start+=1;
+            //if(visible_start>1)
+            //  visible_start=0;
+            
+            // Guardar la luz en el array
+            spotLights.push(light);
+            
+            // Alternar entre 0 y 1 para cambiar entre rojo y azul
+            colorIndex = (colorIndex + 1) % 2;
+            console.log("color: "+colorIndex)
+        }
+        // Cambiar el color inicial de cada fila para crear un patrón de tablero
+        colorIndex = (colorIndex + 1) % 2;
+    }
+
+
+    
+    createBoxBuilding(scene, x_stan, 0, z_stan, 1, 1, 1,                0xff0000);
   
-    createBoxBuilding(scene, x_stan, 0, z_stan, 1, 1, 1, 0xff0000);
-  
-    createBoxBuilding(scene, x_stan + 1, 0, z_stan - 1, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan + 1, 0, z_stan + 1, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan - 1, 0, z_stan - 1, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan - 1, 0, z_stan, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan - 1, 0, z_stan + 1, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan + 0.5, 0, z_stan + 1.5, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan + 0.5, 0, z_stan - 1.5, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan - 1, 0, z_stan + 2, 0.5, 1, 0.5, 0xff0000);
-    createBoxBuilding(scene, x_stan - 1, 0, z_stan - 2, 0.5, 1, 0.5, 0xff0000);
+    createBoxBuilding(scene, x_stan + 1, 0, z_stan - 1, 0.5, 1, 0.5,    0xbe0000);
+    createBoxBuilding(scene, x_stan + 1, 0, z_stan + 1, 0.5, 1, 0.5,    0xbe0000);
+    createBoxBuilding(scene, x_stan - 1, 0, z_stan - 1, 0.5, 1, 0.5,    0xbe0000);
+    createBoxBuilding(scene, x_stan - 1, 0, z_stan, 0.5, 1, 0.5,        0xbe0000);
+    createBoxBuilding(scene, x_stan - 1, 0, z_stan + 1, 0.5, 1, 0.5,    0xbe0000);
+    createBoxBuilding(scene, x_stan + 0.5, 0, z_stan + 1.5, 0.5, 1, 0.5,0xbe0000);
+    createBoxBuilding(scene, x_stan + 0.5, 0, z_stan - 1.5, 0.5, 1, 0.5,0xbe0000);
+    createBoxBuilding(scene, x_stan - 1, 0, z_stan + 2, 0.5, 1, 0.5,    0xbe0000);
+    createBoxBuilding(scene, x_stan - 1, 0, z_stan - 2, 0.5, 1, 0.5,    0xbe0000);
   
     const boats_y = -2 * 0.8;
     createBoatBuilding(
@@ -151,49 +209,52 @@ export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, d
       1.5, 3, 0.15, // sail dimensions
       0x694629, 0xf0f0f0
     );
+
+    return spotLights;
   }
   
-  export function createCityCircus(scene, x_cir, z_cir, helpers_shown) {
+  export function createCircus(scene, x_cir, z_cir, helpers_shown) {
     const cir_radius = 1;
     createCircularHouse(scene, x_cir, 0, z_cir, cir_radius, 1, 1, 0xff0000, 0xff0000);
     createCircularHouse(scene, x_cir - 1, 0, z_cir - 1, cir_radius, 1, 1, 0xff0000, 0xff0000);
   
-    createCityLight(scene, x_cir + cir_radius, 0.5, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir + cir_radius, 0.5, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir - cir_radius, 0.5, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir - cir_radius, 0.5, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir + cir_radius - 1, 0.5, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir + cir_radius - 1, 0.5, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir - cir_radius - 1, 0.5, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createCityLight(scene, x_cir - cir_radius - 1, 0.5, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
+    const y_lights=0.5;
+    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir + cir_radius - 1, y_lights, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir + cir_radius - 1, y_lights, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius - 1, y_lights, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius - 1, y_lights, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
   }
   
-  export  function createCitySmirk(scene, x_cs, z_cs, helpers_shown) {
-    createCityLight(scene, x_cs, 0.5, z_cs,
+  export  function createCptSmirk(scene, x_cs, z_cs, helpers_shown) {
+    createPointLight(scene, x_cs, 0.5, z_cs,
       0xffa400,
       5, 5, helpers_shown);
     createBoxBuilding(scene, x_cs, 0, z_cs, 1, 1, 1);
   }
   
-  export function createCityMeathook(scene, x_mh, z_mh, helpers_shown) {
-    createCityLight(scene, x_mh, 0.5, z_mh,
+  export function createMeathook(scene, x_mh, z_mh, helpers_shown) {
+    createPointLight(scene, x_mh, 0.5, z_mh,
       0xffa400,
       5, 5, helpers_shown);
     createBoxBuilding(scene, x_mh, 0, z_mh, 1, 1, 1);
   }
   
-  export function createCityTown(scene, x_town, z_town, helpers_shown) {
-    createCityLight(scene, x_town, 0.5, z_town,
+  export function createTown(scene, x_town, z_town, helpers_shown) {
+    createPointLight(scene, x_town, 0.5, z_town,
       0xffa400,
       5, 5, helpers_shown);
     createBoxBuilding(scene, x_town + 1, 0, z_town + 2, 1, 1, 1);
   }
   
 
-  export function createCityLightHouse(scene, x_lh, z_lh, helpers_shown) {
+  export function createLightHouse(scene, x_lh, z_lh, helpers_shown) {
     const lh_height = 4;
     const lh_roofheight = .2;
-    createCityLight(scene, x_lh, 0.5, z_lh, 0xffa400,
+    createPointLight(scene, x_lh, 0.5, z_lh, 0xffa400,
       5, 5, helpers_shown);
     createCircularHouse(scene, x_lh, 0, z_lh, 0.5, lh_height, lh_roofheight, 0xffffff, 0xffffff);
   
