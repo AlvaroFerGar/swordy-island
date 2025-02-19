@@ -34,13 +34,11 @@ scene.add(sphere);
 
 ///Camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  50,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
-camera.position.set(-40, 80, 0);
-camera.lookAt(0, 0, 0); // Look at center
 
 //Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -56,12 +54,32 @@ document.body.appendChild(renderer.domElement);
 //Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 // To limit controls
-//controls.minDistance = 0;
-//controls.maxDistance = 500;
-//controls.minPolarAngle = 0; // radians
+controls.minDistance = 80;
+controls.maxDistance = 200;
+controls.maxPolarAngle = Math.PI/4; // radians
+controls.enableDamping=true;
+controls.enablePan=false;
 
-
-//controls.maxPolarAngle = Math.PI/4; // radians
+const loadControlsFromFile = (controls, filePath) => {
+  fetch(filePath)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error al cargar el archivo");
+      }
+      return response.text();
+    })
+    .then(stateJSON => {
+      const { target0, position0, zoom0 } = JSON.parse(stateJSON);
+      controls.target0.copy(target0);
+      controls.position0.copy(position0);
+      controls.zoom0 = zoom0;
+      controls.reset();
+    })
+    .catch(error => {
+      console.error("Error:", error);
+    });
+};
+loadControlsFromFile(controls, "./assets/orbitControls.json");
 
 ///Lights
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -241,9 +259,28 @@ window.addEventListener("click", (event) => {
 
 });
 
+/** Utilidad para guardar el estado del Orbit Control */
+/**
+const saveControlsToFile = (controls) => {
+  controls.saveState();
+  const { target0, position0, zoom0 } = controls;
+  const state = { target0, position0, zoom0 };
+  const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'orbitControls.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
-
-
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'Space') {
+    saveControlsToFile(controls);
+    console.log('Estado de los controles guardado en un archivo JSON.');
+  }
+});
+*/
 
 let frames = 0;
 let pirate_list=[]
@@ -254,10 +291,20 @@ function animate() {
   const animationId = requestAnimationFrame(animate);
   renderer.render(scene, camera);
 
+  //controls.update();
+
   const delta = clock.getDelta(); // Get the time since the last frame
 
-  if(clock.getElapsedTime()>5)
-    loadingScreen.classList.add('hidden');
+  if(clock.getElapsedTime()>3)
+    {
+      loadingScreen.classList.add('hidden');
+      controls.enabled=true;
+    }
+
+  //Debug logs to configure the inital camera position
+  //console.log("Camera pos: " + camera.position.x+" "+camera.position.y+" "+camera.position.z+" ");
+  //console.log("Camera rot: new THREE.Euler("+camera.rotation.x+", "+camera.rotation.y+", "+camera.rotation.z+","+camera.rotation.order+");");
+  
 
 
   //Guyblock
@@ -308,7 +355,7 @@ function animate() {
   firecamplight.intensity = baseIntensity + Math.abs(Math.sin(time * 1.5) * intensityVariation);
 
   //Pirates
-  if(pirate_list.length<5)
+  if(pirate_list.length<3)
   {
     let piratenpc= createRandomNPC(pirate_id, cities_points, grid);
     scene.add(piratenpc);
