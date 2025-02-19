@@ -6,6 +6,7 @@ import { createOcean } from "./world/ocean.js";
 import { loadSVG, createVisualOrigin } from "./world/land.js";
 import  aStar  from "./utils/astarisborn.js"
 import * as cities from "./world/buildings.js";
+import createGuyblockText from "./text/text.js"
 
 
 // Get the loading screen element
@@ -126,6 +127,14 @@ const guyblock = new Pirate({
   },
 });
 scene.add(guyblock);
+const guyblocklight = new THREE.PointLight("#ffffff", 5, 5);
+guyblocklight.position.set(guyblock.position.x, 3, guyblock.position.z);
+guyblock.add(guyblocklight)//Light to make clear is the main character
+
+//Added sprite
+createGuyblockText(guyblock);
+
+
 
 
 const loadingPromise = new Promise((resolve) => setTimeout(resolve, 1)); // 3 seconds delay
