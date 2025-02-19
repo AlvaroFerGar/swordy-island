@@ -22,7 +22,7 @@ This fan game is a homage to the legendary **The Secret of Monkey Island**, feat
 
 ## Usage ⛵
 
-- Try it here
+- Try it [here](https://alvarofergar.github.io/swordy-island/)!
 - Click on the island to move Guyblock to the clicked location.
 - Use the OrbitControls to take a look at the island
 
