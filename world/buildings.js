@@ -101,6 +101,7 @@ export function createPointLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, 
     
     scene.add(citylight);
 
+    return citylight;
   }
 
 
@@ -245,9 +246,30 @@ export function createPointLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, 
   
   export function createTown(scene, x_town, z_town, helpers_shown) {
     createPointLight(scene, x_town, 0.5, z_town,
-      0xffa400,
-      5, 5, helpers_shown);
-    createBoxBuilding(scene, x_town + 1, 0, z_town + 2, 1, 1, 1);
+    0xffa400,
+    2, 0, helpers_shown);
+    createPointLight(scene, x_town-2, 0.5, z_town,
+    0xffa400,
+    2, 0, helpers_shown);
+    createPointLight(scene, x_town-2, 0.5, z_town-2,
+    0xffa400,
+    2, 0, helpers_shown);
+  
+
+    createBoxBuilding(scene,  x_town + 1, 0, z_town + 2, .2, .2, .2, 0xff8c00);
+    let firecamplight=createPointLight(scene,   x_town + 1, 2, z_town + 2,
+      0xff1900,
+      50, 0.2, helpers_shown);
+
+
+    createBoxBuilding(scene, x_town -1.2, 0, z_town -.2 , 1, 1, 1,0xffb61e);
+    createBoxBuilding(scene, x_town -0.5, 0, z_town     , 1, 1, 1,0xffb61e);
+    createBoxBuilding(scene, x_town -2, 0, z_town -.3   , 1, 1, 1,0xffb61e);
+    createBoxBuilding(scene, x_town -3, 0, z_town -1    , 1, 1, 1,0xffb61e);
+    createBoxBuilding(scene, x_town -1.5, 0, z_town -1  , 0.5, 4, 0.5,0xffb61e);
+    createBoxBuilding(scene, x_town -1, 0, z_town -2    , 1, 1, 1,0xffb61e);
+
+    return firecamplight;
   }
   
 

@@ -7,7 +7,7 @@ import { loadSVG, createVisualOrigin } from "./world/land.js";
 import  aStar  from "./utils/astarisborn.js"
 import * as cities from "./world/buildings.js";
 import { createGuyblockText } from "./text/text.js"
-
+import { sigmoid } from "./utils/misc.js";
 
 // Get the loading screen element
 const loadingScreen = document.getElementById('loading-screen');
@@ -20,11 +20,6 @@ const helpers_shown=false;
 ///Scene
 const scene = new THREE.Scene();
 const loader = new THREE.TextureLoader();
-/*loader.load('assets/background.png', function(texture) {
-    scene.background = texture;
-}, undefined, function(error) {
-    console.error('Error al cargar la textura', error);
-});*/
 const geometry = new THREE.SphereGeometry(500, 60, 40);
 // Flip the geometry inside out
 geometry.scale(-1, 1, 1);
@@ -87,9 +82,9 @@ const cities_points=[];
 
 //Town
 const x_town=-19
-const z_town=-17
+const z_town=-18
 cities_points.push({x:x_town,z:z_town})
-cities.createTown(scene, x_town, z_town, helpers_shown);
+let firecamplight=cities.createTown(scene, x_town, z_town, helpers_shown);
 
 //MeatHook
 const x_mh=39
@@ -123,6 +118,11 @@ const { light_lh, helper_lh } = cities.createLightHouse(scene, x_lh, z_lh, helpe
 
 
 
+//Ocean
+const {ocean, staticOcean} = createOcean();
+scene.add(staticOcean)
+scene.add(ocean);
+
 
 ///Pirate
 const guyblock = new Pirate({
@@ -137,7 +137,8 @@ const guyblock = new Pirate({
   },
 });
 scene.add(guyblock);
-const guyblocklight = new THREE.PointLight("#ffffff", 5, 5);
+const guyblocklight_intensity=5;
+const guyblocklight = new THREE.PointLight("#ffffff", guyblocklight_intensity, 5);
 guyblocklight.position.set(guyblock.position.x, 3, guyblock.position.z);
 guyblock.add(guyblocklight)//Light to make clear is the main character
 
@@ -147,7 +148,6 @@ createGuyblockText(guyblock);
 
 
 
-const loadingPromise = new Promise((resolve) => setTimeout(resolve, 1)); // 3 seconds delay
 ///Ground
 console.log("Cargando SVG...");
 const ground_polygon_vertices = await loadSVG('assets/swordyisland.svg',scene);
@@ -168,24 +168,18 @@ let grid = createGrid(ground_polygon_vertices, 1, scene); // Create grid with sp
 //   }));
 //});
 
-// Wait for both the loading promise and the asset loading to complete
-await loadingPromise;
-// Hide the loading screen once everything is loaded
-loadingScreen.classList.add('hidden');
 
 
 //Clock
 let clock = new THREE.Clock();
 
-//Ocean
-const {ocean, staticOcean} = createOcean();
-scene.add(staticOcean)
-scene.add(ocean);
+
 
 
 //Eje de coordenadas
-createVisualOrigin(scene);
- 
+//createVisualOrigin(scene);
+
+guyblock.position.set(firecamplight.position.x,0,firecamplight.position.z)
 
 //Ray Casting
 const raycaster = new THREE.Raycaster();
@@ -260,16 +254,39 @@ function animate() {
   const animationId = requestAnimationFrame(animate);
   renderer.render(scene, camera);
 
-  guyblock.update();
+  const delta = clock.getDelta(); // Get the time since the last frame
 
+  if(clock.getElapsedTime()>5)
+    loadingScreen.classList.add('hidden');
+
+
+  //Guyblock
+  guyblock.update();
+  let minDistance = Infinity;
+  let closestCity = null;
+  for (const city of cities_points)
+  {
+    let dx=guyblock.position.x-city.x
+    let dz=guyblock.position.z-city.z
+    let dist=Math.sqrt(dx * dx + dz * dz);
+    if (dist < minDistance) {
+    minDistance = dist;
+    closestCity = city;
+    }
+  }
+  const intensity = sigmoid(minDistance,5,10, guyblocklight_intensity);
+  guyblocklight.intensity = intensity;
+
+
+  //Ocean
   ocean.update(clock);
 
-
+  //Firelight
   light_lh.update()
   helper_lh.update();
 
 
-  const delta = clock.getDelta(); // Get the time since the last frame
+  //Stan
   elapsed_stan_time += delta; // Accumulate elapsed time
 
   if(elapsed_stan_time>=0.5)
@@ -283,6 +300,14 @@ function animate() {
   elapsed_stan_time=0;
   }
 
+  //Firecamp
+  const fireSpeed = 0.25; // Velocidad a la que se mueven las "llamas"
+  const intensityVariation = 5; // Variación de la intensidad de la luz
+  const baseIntensity = 5; // Intensidad base de la luz
+  const time = clock.getElapsedTime() * fireSpeed;  
+  firecamplight.intensity = baseIntensity + Math.abs(Math.sin(time * 1.5) * intensityVariation);
+
+  //Pirates
   if(pirate_list.length<5)
   {
     let piratenpc= createRandomNPC(pirate_id, cities_points, grid);
@@ -307,7 +332,6 @@ function animate() {
 
     scene.remove(npc);
 
-    // 2. Liberar memoria de materiales y geometría
     if (npc.geometry) pirate.geometry.dispose();
     if (npc.material) {
         if (Array.isArray(npc.material)) {
@@ -316,8 +340,6 @@ function animate() {
           npc.material.dispose();
         }
     }
-
-    // 3. Eliminarlo de la lista pirate_list
     let index = pirate_list.indexOf(npc);
     if (index !== -1) {
         pirate_list.splice(index, 1);
