@@ -104,10 +104,10 @@ export function createCityLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, d
 
   }
 
-  export function createCityShipyard(scene, x_stan, z_stan) {
+  export function createCityShipyard(scene, x_stan, z_stan,helpers_shown) {
     createCityLight(scene, x_stan, 0.5, z_stan,
       0xff0000,
-      500, 500, true);
+      500, 500, helpers_shown);
   
     createBoxBuilding(scene, x_stan, 0, z_stan, 1, 1, 1, 0xff0000);
   

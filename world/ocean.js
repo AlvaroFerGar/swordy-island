@@ -10,7 +10,8 @@ export const createOcean = () => {
   const oceanHeight = -2; // Posición en el eje Y donde se coloca el océano
   const waveHeight = 1.5; // Altura máxima de las olas
   const phaseRange = Math.PI/2; // Rango de variación de la fase inicial de cada ola
-  
+  const radius=250;
+
   // Creamos un plano con el tamaño y subdivisiones especificadas
   const geometry = new THREE.PlaneGeometry(size, size, subdivisions, subdivisions);
   geometry.rotateX(-Math.PI * 0.5);
@@ -37,6 +38,14 @@ export const createOcean = () => {
     // Extraemos la posición del vértice en la geometría
     tempVector.fromBufferAttribute(geometry.attributes.position, i);
     
+    // Calculamos la distancia desde el centro
+    const distance = Math.sqrt(tempVector.x * tempVector.x + tempVector.z * tempVector.z);
+    
+    // Ocultamos los vértices fuera del radio
+    if (distance > radius) {
+      geometry.attributes.position.setY(i, -9999);
+    }
+
     // Guardamos datos para animar este vértice
     vertData.push({
       initH: tempVector.y, // Altura inicial del vértice
@@ -53,6 +62,8 @@ export const createOcean = () => {
     const time = clock.getElapsedTime() * waveSpeed; // Se multiplica por waveSpeed para ajustar la velocidad
     // Recorremos cada vértice y ajustamos su altura con una función seno
     vertData.forEach((vd, idx) => {
+        if (geometry.attributes.position.getY(idx) < -99)
+            return;
       const y = vd.initH + Math.sin(time + vd.phase) * vd.amplitude;
       geometry.attributes.position.setY(idx, y);
     });
@@ -64,5 +75,13 @@ export const createOcean = () => {
     geometry.computeVertexNormals();
   };
 
-  return ocean; // Devolvemos el objeto "ocean" para que pueda agregarse a la escena
+
+    // Creamos un plano estático de 2000x2000
+    const staticGeometry = new THREE.CircleGeometry(radius*1.1);
+    staticGeometry.rotateX(-Math.PI * 0.5);
+    const staticOcean = new THREE.Mesh(staticGeometry, material);
+    staticOcean.position.y = oceanHeight-waveHeight;
+    staticOcean.receiveShadow = true;
+
+  return {ocean, staticOcean};
 };

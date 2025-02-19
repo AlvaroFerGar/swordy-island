@@ -6,7 +6,7 @@ import { createOcean } from "./world/ocean.js";
 import { loadSVG, createVisualOrigin } from "./world/land.js";
 import  aStar  from "./utils/astarisborn.js"
 import * as cities from "./world/buildings.js";
-import createGuyblockText from "./text/text.js"
+import { createGuyblockText } from "./text/text.js"
 
 
 // Get the loading screen element
@@ -20,11 +20,21 @@ const helpers_shown=false;
 ///Scene
 const scene = new THREE.Scene();
 const loader = new THREE.TextureLoader();
-loader.load('assets/background.png', function(texture) {
+/*loader.load('assets/background.png', function(texture) {
     scene.background = texture;
 }, undefined, function(error) {
     console.error('Error al cargar la textura', error);
+});*/
+const geometry = new THREE.SphereGeometry(500, 60, 40);
+// Flip the geometry inside out
+geometry.scale(-1, 1, 1);
+
+const material = new THREE.MeshBasicMaterial({
+    map: new THREE.TextureLoader().load('assets/background.png')
 });
+
+const sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
 
 
 ///Camera
@@ -103,7 +113,7 @@ cities.createCityCircus(scene, x_cir, z_cir, helpers_shown);
 const x_stan=-29
 const z_stan=38
 cities_points.push({x:x_stan,z:z_stan})
-cities.createCityShipyard(scene, x_stan, z_stan);
+cities.createCityShipyard(scene, x_stan, z_stan, helpers_shown);
 
 //LightHouse
 const x_lh=22
@@ -168,7 +178,8 @@ loadingScreen.classList.add('hidden');
 let clock = new THREE.Clock();
 
 //Ocean
-const ocean = createOcean();
+const {ocean, staticOcean} = createOcean();
+scene.add(staticOcean)
 scene.add(ocean);
 
 
