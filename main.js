@@ -81,6 +81,35 @@ const loadControlsFromFile = (controls, filePath) => {
 };
 loadControlsFromFile(controls, "./assets/orbitControls.json");
 
+
+//Music
+async function loadBackgroundMusic() {
+  return new Promise((resolve, reject) => {
+      const listener = new THREE.AudioListener();
+      camera.add(listener);
+
+      const backgroundSound = new THREE.Audio(listener);
+      const audioLoader = new THREE.AudioLoader();
+
+      audioLoader.load(
+          './assets/Monplaisir - Soundtrack.mp3',
+          function(buffer) {
+              console.log("Music loaded successfully!");
+              backgroundSound.setBuffer(buffer);
+              backgroundSound.setLoop(true);
+              backgroundSound.setVolume(0.5);
+              resolve(backgroundSound); // Resolvemos la promesa con el audio cargado
+          },
+          undefined, // Progreso (opcional)
+          function(error) {
+              console.error("Error loading music:", error);
+              reject(error); // Rechazamos la promesa si hay un error
+          }
+      );
+  });
+}
+
+const backgroundSound = await loadBackgroundMusic(); // Espera a que la música se cargue
 ///Lights
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.y = 4;
@@ -205,6 +234,12 @@ const mouse = new THREE.Vector2();
 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // Plane at z = 0
 
 window.addEventListener("click", (event) => {
+
+  if (!backgroundSound.isPlaying) {
+    backgroundSound.play();
+    console.log("Background music started!");
+}
+
   // Convert mouse position to NDC (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
