@@ -45,8 +45,8 @@ export default function aStar(startPos, goalPos, grid) {
     // Get start and goal nodes from our nodes Map
     const start = nodes.get(`${startPos.x},${startPos.y}`);
     const goal = nodes.get(`${goalPos.x},${goalPos.y}`);
-    console.log(start.getKey())
-    console.log(goal.getKey())
+    //console.log(start.getKey())
+    //console.log(goal.getKey())
 
     // Initialize start node with 0 cost since we're starting here
     start.updateCosts(0, goal);
