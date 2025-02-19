@@ -4,13 +4,13 @@ import * as THREE from "three";
 //Ocean code
 export const createOcean = () => {
 
-  const size = 500; // Tamaño del océano (ancho y largo)
+  const size = 400; // Tamaño del océano (ancho y largo)
   const subdivisions = 250; // Número de subdivisiones de la geometría (afecta la resolución de las olas)
   const color = 0x0388fc; // Color del océano
   const oceanHeight = -2; // Posición en el eje Y donde se coloca el océano
   const waveHeight = 1.5; // Altura máxima de las olas
   const phaseRange = Math.PI/2; // Rango de variación de la fase inicial de cada ola
-  const radius=250;
+  const radius=180;
 
   // Creamos un plano con el tamaño y subdivisiones especificadas
   const geometry = new THREE.PlaneGeometry(size, size, subdivisions, subdivisions);
@@ -77,11 +77,11 @@ export const createOcean = () => {
 
 
     // Creamos un plano estático de 2000x2000
-    const staticGeometry = new THREE.CircleGeometry(radius*1.1);
+    const staticGeometry = new THREE.CircleGeometry(radius*1.6);
     staticGeometry.rotateX(-Math.PI * 0.5);
     const staticOcean = new THREE.Mesh(staticGeometry, material);
     staticOcean.position.y = oceanHeight-waveHeight;
-    staticOcean.receiveShadow = true;
+    //staticOcean.receiveShadow = true;
 
   return {ocean, staticOcean};
 };

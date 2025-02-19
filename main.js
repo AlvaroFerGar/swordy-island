@@ -44,9 +44,16 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer({
   alpha: true,
   antialias: true,
+  powerPreference: "high-performance", // Prioritize performance
 });
-renderer.shadowMap.enabled = true;
+
+//const gl = renderer.getContext();
+//console.log('Supported WebGL Extensions:', gl.getSupportedExtensions())
+
+  renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Opcional: mejora la calidad de las sombras
+renderer.autoClear = true;
+renderer.sortObjects = true;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -116,6 +123,15 @@ light.position.y = 4;
 light.position.x = camera.position.x-200;
 light.position.z = camera.position.z-200;
 light.castShadow = true;
+//light.shadow.mapSize.width = 256;  // Reduced from default 512x512
+//light.shadow.mapSize.height = 256;
+//light.shadow.camera.left = -30;
+//light.shadow.camera.right = 30;
+//light.shadow.camera.top = 30;
+//light.shadow.camera.bottom = -30;
+//light.shadow.camera.near = 0.5;
+//light.shadow.camera.far = 50;
+//light.shadow.camera.updateProjectionMatrix();
 light.shadow.bias = -0.005;  // Adjust as needed
 scene.add(light);
 let helper = new THREE.DirectionalLightHelper(light, 5);

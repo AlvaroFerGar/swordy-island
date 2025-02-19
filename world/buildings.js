@@ -7,7 +7,7 @@ function createBaseMesh(scene, geometry, x, y, z, colorhex=0xffb61e) {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    //mesh.receiveShadow = true;
     scene.add(mesh);
     return mesh;
 }
@@ -109,7 +109,7 @@ export function createPointLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, 
     const citylight = new THREE.SpotLight(colorhex, intensity, distance, Math.PI / 32, 1, 128);
     citylight.position.set(x, y, z);
     citylight.target.position.set(x, 0, z)
-    citylight.castShadow = true;
+    //citylight.castShadow = true;
     if(shownhelper)
     {
         let cityhelper = new THREE.SpotLightHelper(citylight, 2);
@@ -220,14 +220,10 @@ export function createPointLight(scene, x, y, z,colorhex=0xffb61e, intensity=5, 
     createCircularHouse(scene, x_cir - 1, 0, z_cir - 1, cir_radius, 1, 1, 0xff0000, 0xff0000);
   
     const y_lights=0.5;
-    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir + cir_radius - 1, y_lights, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir + cir_radius - 1, y_lights, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir - cir_radius - 1, y_lights, z_cir + cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
-    createPointLight(scene, x_cir - cir_radius - 1, y_lights, z_cir - cir_radius - 1, 0xff0000, 10, 10, helpers_shown);
+    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 20, 10, helpers_shown);
+    createPointLight(scene, x_cir + cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 20, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir + cir_radius, 0xff0000, 20, 10, helpers_shown);
+    createPointLight(scene, x_cir - cir_radius, y_lights, z_cir - cir_radius, 0xff0000, 20, 10, helpers_shown);
   }
   
   export  function createCptSmirk(scene, x_cs, z_cs, helpers_shown) {
