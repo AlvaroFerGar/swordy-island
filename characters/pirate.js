@@ -173,19 +173,19 @@ export class Pirate extends THREE.Group {
 export function createRandomNPC(pirate_id, cities_points, grid) {
   const colorSets = [
     {
-      color_hair: "#313dd5",
+      color_hair: "#313dd5",//blue
       color_face: "#59342a",
       color_body: "#313dd5",
       color_legs: "#51b8be",
     },
     {
-      color_hair: "#be9151",
+      color_hair: "#e3270e",//red
       color_face: "#be9151",
       color_body: "#e30e0e",
       color_legs: "#aeaea6",
     },
     {
-      color_hair: "#ff7e00",
+      color_hair: "#ecedab",//yellow
       color_face: "#ebb0a0",
       color_body: "#eff210",
       color_legs: "#183043",
