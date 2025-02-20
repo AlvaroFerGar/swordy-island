@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {Pirate, createRandomNPC} from "./characters/pirate.js";
+import { createTextSprite } from "./text/text.js";
 import { isPointInPolygon, createGrid } from "./utils/polyutils.js"
 import { createOcean } from "./world/ocean.js";
 import { loadSVG, createVisualOrigin } from "./world/land.js";
@@ -146,38 +147,54 @@ const cities_points=[];
 //Town
 const x_town=-19
 const z_town=-18
-cities_points.push({x:x_town,z:z_town})
+cities_points.push({x:x_town,z:z_town, label: "Town"})
 let firecamplight=cities.createTown(scene, x_town, z_town, helpers_shown);
 
 //MeatHook
 const x_mh=39
 const z_mh=63
-cities_points.push({x:x_mh,z:z_mh})
+cities_points.push({x:x_mh,z:z_mh, label: "MeatHook's House"})
 cities.createMeathook(scene, x_mh, z_mh, helpers_shown);
 
 //Smirk
 const x_cs=-28
 const z_cs=78
-cities_points.push({x:x_cs,z:z_cs})
+cities_points.push({x:x_cs,z:z_cs, label: "Cpt. Square's House"})
 cities.createCptSmirk(scene, x_cs, z_cs, helpers_shown);
 
 //Circus
 const x_cir=3
 const z_cir=20
-cities_points.push({x:x_cir,z:z_cir})
+cities_points.push({x:x_cir,z:z_cir, label: "Circus"})
 cities.createCircus(scene, x_cir, z_cir, helpers_shown);
 
 //Shipyard
 const x_stan=-29
 const z_stan=38
-cities_points.push({x:x_stan,z:z_stan})
+cities_points.push({x:x_stan,z:z_stan, label: "Stan"})
 let spotlights=cities.createStanShipyard(scene, x_stan, z_stan, helpers_shown);
 
 //LightHouse
 const x_lh=22
 const z_lh=-42
-cities_points.push({x:x_lh,z:z_lh})
+cities_points.push({x:x_lh,z:z_lh, label: "LightHouse"})
 const { light_lh, helper_lh } = cities.createLightHouse(scene, x_lh, z_lh, helpers_shown);
+
+//City Sprites
+
+const cityTextSprites = new Map();
+const textHeight = 2; // Altura del texto sobre el punto de la ciudad
+
+cities_points.forEach(city => {
+  createTextSprite(city.label, "./assets/lucasarts-scumm-solid.otf").then(textSprite => {
+    textSprite.visible = false; // Ocultar inicialmente
+    textSprite.position.x=city.x;
+    textSprite.position.y = textHeight; // Elevar el texto sobre el punto
+    textSprite.position.z=city.z;
+    scene.add(textSprite);
+    cityTextSprites.set(city.label, textSprite); // Almacenar en el mapa
+  });
+});
 
 
 
@@ -308,6 +325,53 @@ window.addEventListener("click", (event) => {
   //   },
   // }));
 
+});
+
+cities_points.push({x:x_lh,z:z_lh})
+
+window.addEventListener("mousemove", (event) => {
+
+  const proximityThreshold = 10; // Distancia en unidades del mundo 3D
+
+  // Convert mouse position to NDC (-1 to +1)
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Set raycaster from camera through the mouse position
+  raycaster.setFromCamera(mouse, camera);
+
+  // Get intersection with the z=0 plane
+  const intersection = new THREE.Vector3();
+  raycaster.ray.intersectPlane(plane, intersection);
+
+  // Ocultar todos los textos primero
+  cityTextSprites.forEach(textSprite => {
+    textSprite.visible = false;
+  });
+
+  //console.log(ground_polygon_vertices)
+
+    //console.log(`Moused over at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
+
+    let closestCity = null;
+    let closestDistance = Infinity;
+
+    cities_points.forEach(city => {
+      const distance = (city.x-intersection.x)**2 + (city.z-intersection.z)**2;
+      if (distance < proximityThreshold && distance < closestDistance) {
+        closestCity = city;
+        closestDistance = distance;
+      }
+    });
+
+    // Mostrar el texto de la ciudad más cercana
+    if (closestCity) {
+      const textSprite = cityTextSprites.get(closestCity.label);
+      if (textSprite)
+        {
+        textSprite.visible = true;
+      }
+    }
 });
 
 /** Utilidad para guardar el estado del Orbit Control */

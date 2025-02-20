@@ -13,42 +13,49 @@ const loadCustomFont = async (fontPath) => {
   }
 };
 
-const createTextSprite =async (text,fontpath) => {
 
+export async function createTextSprite(text, fontpath) {
   await loadCustomFont(fontpath);
 
-  // Create canvas for text
+  // Crear canvas para el texto
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
-  canvas.width = 2048;  // Increased canvas size
-  canvas.height = 1024;
-  
-  // Clear the canvas with a background (for debugging)
-  //context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  //context.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Set text properties
-  context.font = '256px CustomFont';  // Increased font size
-  context.fillStyle = '#ffffff';     // Bright white
+
+  const fontSize = 256; // Tamaño base de la fuente
+  context.font = `${fontSize}px CustomFont`;
+  context.fillStyle = '#ffffff'; // Color del texto
   context.textAlign = 'center';
-  context.textBaseline = 'middle';   // Better vertical centering
-  
-  // Add text to canvas
-  context.fillText(text, canvas.width/2, canvas.height/2);
-  // Create sprite texture
+  context.textBaseline = 'middle';
+
+  const textWidth = context.measureText(text).width;
+  const padding = 50; // Espacio adicional alrededor del texto
+
+  canvas.width = textWidth + padding * 2; // Ancho del canvas
+  canvas.height = fontSize + padding * 2; // Alto del canvas
+
+  context.font = `${fontSize}px CustomFont`;
+  context.fillStyle = '#ffffff';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+
+  context.fillText(text, canvas.width / 2, canvas.height / 2);
+
   const texture = new THREE.CanvasTexture(canvas);
-  const spriteMaterial = new THREE.SpriteMaterial({ 
-      map: texture,
-      transparent: true,    // Enable transparency
-      depthTest: false,     // Make sure text renders on top
-      depthWrite: false     // Make sure text renders on top
+  const spriteMaterial = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
   });
-  
+
+  // Crear el sprite
   const sprite = new THREE.Sprite(spriteMaterial);
-  sprite.scale.set(24, 12, 6);  // Increased scale
-  
+
+  const scaleFactor = 1/100; // Factor de escala para ajustar el tamaño en la escena
+  sprite.scale.set(canvas.width * scaleFactor, canvas.height * scaleFactor, 1);
+
   return sprite;
-};
+}
 
 export async function createGuyblockText(pirate) {
   const textSprite = await createTextSprite("Guyblock","./assets/lucasarts-scumm-solid.otf");
@@ -57,4 +64,6 @@ export async function createGuyblockText(pirate) {
 
   pirate.add(textSprite);
   textSprite.position.set(0, pirate.pirateHeight*2, 0);
+
+  return textSprite;
 }
