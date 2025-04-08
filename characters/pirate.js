@@ -128,44 +128,49 @@ export class Pirate extends THREE.Group {
   pathPlanning() {
     const movement_increment = 0.25;
 
-    // Si hay un camino y no hemos llegado al final
-    if (this.path && this.path.length > 0) {
-      // Obtener el siguiente punto del camino
-      const nextPoint = this.path[0];
+    if(!this.hasPath)
+      return;
 
-      // Actualizar el objetivo actual
-      this.xGoal = nextPoint.x;
-      this.zGoal = nextPoint.y; // Nota: Asegúrate de que el camino use {x, y} o {x, z}
-
-      // Verificar si el pirata ha alcanzado el punto actual
-      const reached_x =
-        Math.abs(this.position.x - this.xGoal) < movement_increment * 0.5;
-      const reached_z =
-        Math.abs(this.position.z - this.zGoal) < movement_increment * 0.5;
-
-      if (reached_x && reached_z) {
-        // Si el pirata ha alcanzado el punto, avanzar al siguiente punto del camino
-        this.path.shift(); // Eliminar el punto actual del camino
-        if (this.path.length === 0) {
-          // Si no hay más puntos, detener el movimiento
-          this.hasPath = false;
-          console.log(
-            "¡El pirata #" + this.pirate_id + " ha llegado a su destino!"
-          );
-        }
-      } else {
-        // Mover el pirata hacia el punto actual
-        this.position.x += reached_x
-          ? 0
-          : Math.sign(this.xGoal - this.position.x) * movement_increment;
-        this.position.z += reached_z
-          ? 0
-          : Math.sign(this.zGoal - this.position.z) * movement_increment;
-      }
-    } else {
+    if(!this.path || this.path.length <= 0)
+    {
       // Si no hay camino, detener el movimiento
       this.hasPath = false;
-      //console.log("No hay camino o el camino ha terminado.");
+      console.log("No hay camino o el camino ha terminado.");
+      return;
+    }
+    
+    // Si hay un camino y no hemos llegado al final
+      // Obtener el siguiente punto del camino
+    const nextPoint = this.path[0];
+
+    // Actualizar el objetivo actual
+    this.xGoal = nextPoint.x;
+    this.zGoal = nextPoint.y; // Nota: Asegúrate de que el camino use {x, y} o {x, z}
+
+    // Verificar si el pirata ha alcanzado el punto actual
+    const reached_x =
+      Math.abs(this.position.x - this.xGoal) < movement_increment * 0.5;
+    const reached_z =
+      Math.abs(this.position.z - this.zGoal) < movement_increment * 0.5;
+
+    if (reached_x && reached_z) {
+      // Si el pirata ha alcanzado el punto, avanzar al siguiente punto del camino
+      this.path.shift(); // Eliminar el punto actual del camino
+      if (this.path.length === 0) {
+        // Si no hay más puntos, detener el movimiento
+        this.hasPath = false;
+        console.log(
+          "¡El pirata #" + this.pirate_id + " ha llegado a su destino!"
+        );
+      }
+    } else {
+      // Mover el pirata hacia el punto actual
+      this.position.x += reached_x
+        ? 0
+        : Math.sign(this.xGoal - this.position.x) * movement_increment;
+      this.position.z += reached_z
+        ? 0
+        : Math.sign(this.zGoal - this.position.z) * movement_increment;
     }
   }
 }
