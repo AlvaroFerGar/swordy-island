@@ -402,6 +402,8 @@ let pirate_list=[]
 let pirate_id=1;
 let elapsed_stan_time=0;
 
+let freeze_by_battle=false;
+
 function animate() {
   const animationId = requestAnimationFrame(animate);
   renderer.render(scene, camera);
@@ -423,20 +425,29 @@ function animate() {
 
 
   //Guyblock
-  guyblock.update(delta);
+  if(!freeze_by_battle)
+    guyblock.update(delta);
+  
   let minDistance = Infinity;
   let closestCity = null;
+  let guyblock_close_to_city=false;
+  let guyblock_close_distance=5;
   for (const city of cities_points)
   {
     let dx=guyblock.position.x-city.x
     let dz=guyblock.position.z-city.z
     let dist=Math.sqrt(dx * dx + dz * dz);
-    if (dist < minDistance) {
-    minDistance = dist;
-    closestCity = city;
+    if (dist < minDistance)
+    {
+      minDistance = dist;
+      closestCity = city;
     }
   }
-  const intensity = sigmoid(minDistance,5,10, guyblocklight_intensity);
+  console.log("Guyblock distance to city: "+minDistance+" and closest city is "+closestCity.label);
+  if(minDistance<guyblock_close_distance)
+    guyblock_close_to_city=true;
+
+  const intensity = sigmoid(minDistance,guyblock_close_distance,10, guyblocklight_intensity);
   guyblocklight.intensity = intensity;
 
 
@@ -481,12 +492,17 @@ function animate() {
 
   for(let npc of pirate_list)
   {
+
+    if (freeze_by_battle)
+      continue
+
     npc.update(delta);
 
 
-    if ((npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 4)
+    if (!guyblock_close_to_city && (npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 8)
     {
       console.log("Colisión entre Guyblock y pirata #"+npc.pirate_id)
+      freeze_by_battle=true;
     }
 
     if(npc.hasPath===true)
