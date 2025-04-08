@@ -89,12 +89,6 @@ export class Pirate extends THREE.Group {
     this.depth = depth;
     this.pirateHeight = pirateHeight;
 
-    // Physics properties
-    this.velocity = velocity;
-    this.gravity = -0.002;
-    this.zAcceleration = zAcceleration;
-
-    //
     this.hasPositionGoal = false;
     this.xGoal = 0;
     this.zGoal = 0;
@@ -116,17 +110,14 @@ export class Pirate extends THREE.Group {
     this.back = this.position.z - this.depth / 2;
   }
 
-  update() {
+  update(delta)
+  {
     this.updateSides();
-    if (this.zAcceleration) this.velocity.z += 0.0003;
-    this.position.x += this.velocity.x;
-    this.position.z += this.velocity.z;
-    //this.applyGravity(ground);
-
-    this.pathPlanning();
+    let movement_increment = (0.5/0.008)*delta;
+    this.pathPlanning(movement_increment);
   }
-  pathPlanning() {
-    const movement_increment = 0.25;
+  
+  pathPlanning(movement_increment = 0.25) {
 
     if(!this.hasPath)
       return;

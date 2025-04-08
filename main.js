@@ -423,7 +423,7 @@ function animate() {
 
 
   //Guyblock
-  guyblock.update();
+  guyblock.update(delta);
   let minDistance = Infinity;
   let closestCity = null;
   for (const city of cities_points)
@@ -481,7 +481,7 @@ function animate() {
 
   for(let npc of pirate_list)
   {
-    npc.update();
+    npc.update(delta);
 
 
     if ((npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 4)
