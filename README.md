@@ -1,10 +1,13 @@
 # 🏝️ Swordy ⚔️ Island 🏝️
 
-*My name is Guyblock Threecube, and I want to be a pirate!*
-
-<div align="left">
-  <img src="assets/guyblock.ico" width="32">
+<div align="center">
+  <img src="assets/readme/deep_in_caribbean.png" width="600">
 </div>
+<div align="left">
+  <img src="assets/guyblock.ico" width="32" align="left"> <i>My name is Guyblock Threecube, and I want to be a pirate!</i>
+</div>
+<br clear="left">
+
 
 
 Welcome to Swordy Island. This is a 3D interactive scene built with **Three.js**.
@@ -12,6 +15,10 @@ Welcome to Swordy Island. This is a 3D interactive scene built with **Three.js**
 This fan game is a homage to the legendary **The Secret of Monkey Island**, featuring a 3D recreation of *Mêlée Island*, where you can explore, interact, and engage in insult sword fighting! 🏴‍☠️
 
 🧌 Disclaimer: **This game is a work in progress!** The *master* branch is used for releases on GitHub Pages, while the *developer* branch contains the latest updates.
+
+<div align="center">
+  <img src="assets/readme/demogif.gif" width="600">
+</div>
 
 ## Features 🗡️
 
