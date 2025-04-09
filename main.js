@@ -404,18 +404,143 @@ let elapsed_stan_time=0;
 
 let freeze_by_battle=false;
 
+
+
+// Variables para el zoom de colisión
+let zoomingToCollision = false;
+let zoomStartTime = 0;
+let zoomDuration = 1.5; // duración de la animación en segundos
+let originalCameraPosition = new THREE.Vector3();
+let targetCameraPosition = new THREE.Vector3();
+let originalControlsTarget = new THREE.Vector3();
+let collisionPoint = new THREE.Vector3();
+let targetPiratePoint = new THREE.Vector3();
+let targetPlayerPoint = new THREE.Vector3();
+let collisionatedPirate=null;
+let originalPiratePosition = new THREE.Vector3();
+let originalGuyblockPosition = new THREE.Vector3();
+
+// Función para iniciar el zoom
+function startCollisionZoom(piratePos, playerPos) {
+  // Guardar la posición original de la cámara
+  originalCameraPosition.copy(camera.position);
+  originalControlsTarget.copy(controls.target);
+  originalPiratePosition.copy(piratePos);
+  originalGuyblockPosition.copy(playerPos);
+  // Crear puntos destino para pirata y jugador
+  targetPiratePoint.copy(piratePos);
+  targetPlayerPoint.copy(playerPos);
+  
+  // Determinar qué coordenada (x o z) está más próxima
+  const xDistance = Math.abs(piratePos.x - playerPos.x);
+  const zDistance = Math.abs(piratePos.z - playerPos.z);
+  const separation = 2.5;
+  // Las coordenadas más próximas las igualamos para ambos targets
+  // Las más alejadas hacemos que tengan una separación de 10 unidades
+  let zcamera=0;
+  let xcamera=0;
+  let zoffset=0;
+  let xoffset=0;
+  if (xDistance <= zDistance) {
+    // X es la coordenada más próxima, la igualamos
+    const avgX = (piratePos.x + playerPos.x) / 2;
+    targetPiratePoint.x = avgX;
+    targetPlayerPoint.x = avgX;
+    xcamera=avgX;
+    xoffset=-10;
+    
+    // Z es la más alejada, establecemos separación de 10
+    const centerZ = (piratePos.z + playerPos.z) / 2;
+    const direction = piratePos.z < playerPos.z ? -1 : 1;
+    targetPiratePoint.z = centerZ + (direction * separation); // 5 unidades en una dirección
+    targetPlayerPoint.z = centerZ - (direction * separation); // 5 unidades en dirección opuesta
+    zcamera=centerZ;
+  } else {
+    // Z es la coordenada más próxima, la igualamos
+    const avgZ = (piratePos.z + playerPos.z) / 2;
+    targetPiratePoint.z = avgZ;
+    targetPlayerPoint.z = avgZ;
+    zcamera=avgZ;
+    zoffset=-10;
+    
+    // X es la más alejada, establecemos separación de 10
+    const centerX = (piratePos.x + playerPos.x) / 2;
+    const direction = piratePos.x < playerPos.x ? -1 : 1;
+    targetPiratePoint.x = centerX + (direction * separation); // 5 unidades en una dirección
+    targetPlayerPoint.x = centerX - (direction * separation); // 5 unidades en dirección opuesta
+    xcamera=centerX;
+  }
+  
+  // Calcular el punto medio de la colisión con las posiciones target
+  collisionPoint.set(
+    xcamera,//(targetPiratePoint.x + targetPlayerPoint.x) / 2,
+    0, // Ligeramente elevado para mejor visualización
+    zcamera//(targetPiratePoint.z + targetPlayerPoint.z) / 2
+  );
+  
+  // Calcular nueva posición de la cámara (vista diagonal desde arriba)
+  const offset = new THREE.Vector3(xoffset, 2.5, zoffset);
+  targetCameraPosition.copy(collisionPoint).add(offset);
+
+  
+  // Iniciar la animación
+  zoomStartTime = Date.now();
+  zoomingToCollision = true;
+  
+  // Desactivar temporalmente los controles de órbita
+  controls.enabled = false;
+}
+
+// Actualizar la animación en el loop de renderizado
+function updateCollisionZoom() {
+  if (!zoomingToCollision) return;
+  
+  const elapsed = (Date.now() - zoomStartTime) / 1000;
+  const progress = Math.min(elapsed / zoomDuration, 1);
+  
+  // Función de easing para suavizar el movimiento (ease-in-out)
+  const easeProgress = progress < 0.5
+    ? 2 * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+  
+  // Interpolar la posición de la cámara
+  camera.position.lerpVectors(originalCameraPosition, targetCameraPosition, easeProgress);
+  
+  // Interpolar el objetivo de los controles
+  controls.target.lerpVectors(originalControlsTarget, collisionPoint, easeProgress);
+  
+  guyblock.position.lerpVectors(originalGuyblockPosition, targetPlayerPoint, easeProgress);
+  collisionatedPirate.position.lerpVectors(originalPiratePosition, targetPiratePoint, easeProgress);
+
+  // Actualizar la cámara
+  camera.lookAt(collisionPoint);
+  
+  // Terminar la animación cuando se complete
+  if (progress >= 1) {
+    zoomingToCollision = false;
+    
+    // Opcional: añadir una función para volver a la vista normal cuando termine la batalla
+    // restaurarVistaOriginal(); // Llamar a esta función cuando la batalla termine
+  }
+}
+
 function animate() {
   const animationId = requestAnimationFrame(animate);
   renderer.render(scene, camera);
 
   //controls.update();
 
+
+  if (zoomingToCollision) {
+    updateCollisionZoom();
+  }
+
   const delta = clock.getDelta(); // Get the time since the last frame
 
   if(clock.getElapsedTime()>3)
     {
       loadingScreen.classList.add('hidden');
-      controls.enabled=true;
+      controls.enabled=true && !freeze_by_battle;
     }
 
   //Debug logs to configure the inital camera position
@@ -499,10 +624,23 @@ function animate() {
     npc.update(delta);
 
 
+
+
+
+    // Modifica tu función de colisión
+    if (!guyblock_close_to_city && (npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 8) {
+      console.log("Colisión entre Guyblock y pirata #" + npc.pirate_id);
+      freeze_by_battle = true;
+      
+      // Iniciar el zoom a la colisión
+      startCollisionZoom(npc.position, guyblock.position);
+    }
+
     if (!guyblock_close_to_city && (npc.position.x - guyblock.position.x) ** 2 + (npc.position.z - guyblock.position.z) ** 2 < 8)
     {
       console.log("Colisión entre Guyblock y pirata #"+npc.pirate_id)
       freeze_by_battle=true;
+      collisionatedPirate=npc;
     }
 
     if(npc.hasPath===true)
