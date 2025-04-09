@@ -113,7 +113,7 @@ export class Pirate extends THREE.Group {
   update(delta)
   {
     this.updateSides();
-    let movement_increment = (0.5/0.008)*delta;
+    let movement_increment = (0.25/0.008)*delta;
     this.pathPlanning(movement_increment);
   }
   

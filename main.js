@@ -7,6 +7,7 @@ import { createOcean } from "./world/ocean.js";
 import { loadSVG, createVisualOrigin } from "./world/land.js";
 import  aStar  from "./utils/astarisborn.js"
 import * as cities from "./world/buildings.js";
+import { CityManager } from "./world/buildings_manager.js";
 import { createGuyblockText } from "./text/text.js"
 import { sigmoid } from "./utils/misc.js";
 import { BattleSystem } from "./battles/battle-system.js";
@@ -142,61 +143,10 @@ if(helpers_shown)
 scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
 
-//Cities
-const cities_points=[];
-
-//Town
-const x_town=-19
-const z_town=-18
-cities_points.push({x:x_town,z:z_town, label: "Town"})
-let firecamplight=cities.createTown(scene, x_town, z_town, helpers_shown);
-
-//MeatHook
-const x_mh=39
-const z_mh=63
-cities_points.push({x:x_mh,z:z_mh, label: "MeatHook's House"})
-cities.createMeathook(scene, x_mh, z_mh, helpers_shown);
-
-//Smirk
-const x_cs=-28
-const z_cs=78
-cities_points.push({x:x_cs,z:z_cs, label: "Cpt. Square's House"})
-cities.createCptSmirk(scene, x_cs, z_cs, helpers_shown);
-
-//Circus
-const x_cir=3
-const z_cir=20
-cities_points.push({x:x_cir,z:z_cir, label: "Circus"})
-cities.createCircus(scene, x_cir, z_cir, helpers_shown);
-
-//Shipyard
-const x_stan=-29
-const z_stan=38
-cities_points.push({x:x_stan,z:z_stan, label: "Stan"})
-let spotlights=cities.createStanShipyard(scene, x_stan, z_stan, helpers_shown);
-
-//LightHouse
-const x_lh=22
-const z_lh=-42
-cities_points.push({x:x_lh,z:z_lh, label: "LightHouse"})
-const { light_lh, helper_lh } = cities.createLightHouse(scene, x_lh, z_lh, helpers_shown);
-
-//City Sprites
-
-const cityTextSprites = new Map();
-const textHeight = 2; // Altura del texto sobre el punto de la ciudad
-
-cities_points.forEach(city => {
-  createTextSprite(city.label, "./assets/lucasarts-scumm-solid.otf").then(textSprite => {
-    textSprite.visible = false; // Ocultar inicialmente
-    textSprite.position.x=city.x;
-    textSprite.position.y = textHeight; // Elevar el texto sobre el punto
-    textSprite.position.z=city.z;
-    scene.add(textSprite);
-    cityTextSprites.set(city.label, textSprite); // Almacenar en el mapa
-  });
-});
-
+// Initialize city manager and create cities
+const cityManager = new CityManager(scene);
+await cityManager.initialize();
+const cities_points = cityManager.cityPoints;
 
 
 //Ocean
@@ -260,8 +210,7 @@ let clock = new THREE.Clock();
 //Eje de coordenadas
 //createVisualOrigin(scene);
 
-guyblock.position.set(firecamplight.position.x,0,firecamplight.position.z)
-
+guyblock.position.set(cityManager.firecamplight.position.x, 0, cityManager.firecamplight.position.z);
 
 
 // Initialize battle system after player and scene are created
@@ -335,8 +284,6 @@ window.addEventListener("click", (event) => {
 
 });
 
-cities_points.push({x:x_lh,z:z_lh})
-
 window.addEventListener("mousemove", (event) => {
 
   const proximityThreshold = 10; // Distancia en unidades del mundo 3D
@@ -351,35 +298,9 @@ window.addEventListener("mousemove", (event) => {
   // Get intersection with the z=0 plane
   const intersection = new THREE.Vector3();
   raycaster.ray.intersectPlane(plane, intersection);
-
-  // Ocultar todos los textos primero
-  cityTextSprites.forEach(textSprite => {
-    textSprite.visible = false;
-  });
-
-  //console.log(ground_polygon_vertices)
-
-    //console.log(`Moused over at: x=${intersection.x}, y=${intersection.y}, z=${intersection.z}`);
-
-    let closestCity = null;
-    let closestDistance = Infinity;
-
-    cities_points.forEach(city => {
-      const distance = (city.x-intersection.x)**2 + (city.z-intersection.z)**2;
-      if (distance < proximityThreshold && distance < closestDistance) {
-        closestCity = city;
-        closestDistance = distance;
-      }
-    });
-
-    // Mostrar el texto de la ciudad más cercana
-    if (closestCity) {
-      const textSprite = cityTextSprites.get(closestCity.label);
-      if (textSprite)
-        {
-        textSprite.visible = true;
-      }
-    }
+  
+  // Update city labels based on mouse position
+  cityManager.updateCityLabels(intersection);
 });
 
 /** Utilidad para guardar el estado del Orbit Control */
@@ -427,8 +348,9 @@ function animate() {
     }
 
   const delta = clock.getDelta(); // Get the time since the last frame
+  const elapsedTime = clock.getElapsedTime();
 
-  if(clock.getElapsedTime()>3)
+  if(elapsedTime>3)
     {
       loadingScreen.classList.add('hidden');
       controls.enabled=true && !freeze_by_battle;
@@ -438,33 +360,21 @@ function animate() {
   //console.log("Camera pos: " + camera.position.x+" "+camera.position.y+" "+camera.position.z+" ");
   //console.log("Camera rot: new THREE.Euler("+camera.rotation.x+", "+camera.rotation.y+", "+camera.rotation.z+","+camera.rotation.order+");");
   
-
+  // Update city manager
+  cityManager.update(delta, elapsedTime);
 
   //Guyblock
   if (!battleSystem.inBattle) {
-    guyblock.update(delta);
+    guyblock.update(delta*1.1);
   }
   
-  let minDistance = Infinity;
-  let closestCity = null;
-  let guyblock_close_to_city=false;
+  // Check proximity to cities
+  const { distance: minDistance, city: closestCity } = cityManager.getClosestCityToPoint(guyblock.position);
+  const guyblock_close_to_city = cityManager.isPointNearCity(guyblock.position, 5);
+  //console.log("Guyblock distance to city: " + minDistance + " and closest city is " + closestCity.label);
+  
+    //Visibility of guyblock light
   let guyblock_close_distance=5;
-  for (const city of cities_points)
-  {
-    let dx=guyblock.position.x-city.x
-    let dz=guyblock.position.z-city.z
-    let dist=Math.sqrt(dx * dx + dz * dz);
-    if (dist < minDistance)
-    {
-      minDistance = dist;
-      closestCity = city;
-    }
-  }
-  //console.log("Guyblock distance to city: "+minDistance+" and closest city is "+closestCity.label);
-  if(minDistance<guyblock_close_distance)
-    guyblock_close_to_city=true;
-
-  //Visibility of guyblock light
   const intensity = sigmoid(minDistance,guyblock_close_distance,10, guyblocklight_intensity);
   guyblocklight.intensity = intensity;
   
@@ -475,32 +385,6 @@ function animate() {
 
   //Ocean
   ocean.update(clock);
-
-  //Firelight
-  light_lh.update()
-  helper_lh.update();
-
-
-  //Stan
-  elapsed_stan_time += delta; // Accumulate elapsed time
-
-  if(elapsed_stan_time>=0.5)
-  {
-  spotlights.sort(() => Math.random() - 0.5);
-  let visibility=spotlights[0].visible;
-  spotlights.forEach(light => {
-    visibility=!visibility;
-    light.visible=visibility
-  });
-  elapsed_stan_time=0;
-  }
-
-  //Firecamp
-  const fireSpeed = 0.25; // Velocidad a la que se mueven las "llamas"
-  const intensityVariation = 5; // Variación de la intensidad de la luz
-  const baseIntensity = 5; // Intensidad base de la luz
-  const time = clock.getElapsedTime() * fireSpeed;  
-  firecamplight.intensity = baseIntensity + Math.abs(Math.sin(time * 1.5) * intensityVariation);
 
   //Pirates
   if(pirate_list.length<3)

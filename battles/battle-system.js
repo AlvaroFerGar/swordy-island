@@ -31,14 +31,14 @@ export class BattleSystem {
       if (this.inBattle)
         return false;
         
-      if(this.playerNearCity)
+      if(playerNearCity)
         return false;
       
       for (const pirate of pirates) {
         const distanceSquared = (pirate.position.x - this.player.position.x) ** 2 + 
                                (pirate.position.z - this.player.position.z) ** 2;
                                
-        if (distanceSquared < 8) {
+        if (distanceSquared < 8*2) {
           console.log("Collision between player and pirate #" + pirate.pirate_id);
           this.startBattle(pirate);
           return true;
