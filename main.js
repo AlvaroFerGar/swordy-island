@@ -272,6 +272,7 @@ const battleSystem = new BattleSystem(scene, camera, controls, guyblock, grid);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // Plane at z = 0
+let lastClickTime = Date.now();
 
 window.addEventListener("click", (event) => {
 
@@ -302,7 +303,7 @@ window.addEventListener("click", (event) => {
     //pirate.xGoal=intersection.x;
     //pirate.zGoal=intersection.z;
 
-
+    lastClickTime = Date.now(); // Update last click time
     console.log("*")
     // Redondear posiciones al entero más cercano
     let startX = Math.round(guyblock.position.x);
@@ -459,13 +460,18 @@ function animate() {
       closestCity = city;
     }
   }
-  console.log("Guyblock distance to city: "+minDistance+" and closest city is "+closestCity.label);
+  //console.log("Guyblock distance to city: "+minDistance+" and closest city is "+closestCity.label);
   if(minDistance<guyblock_close_distance)
     guyblock_close_to_city=true;
 
+  //Visibility of guyblock light
   const intensity = sigmoid(minDistance,guyblock_close_distance,10, guyblocklight_intensity);
   guyblocklight.intensity = intensity;
-
+  
+  //Visibility of guyblock text
+  const timeSinceLastClick = Date.now() - lastClickTime;
+  let guyblockSprite_visible = (guyblock_close_to_city || timeSinceLastClick >= 10*1000) && !battleSystem.inBattle;
+  guyblock.getObjectByName("sprite").visible=guyblockSprite_visible;
 
   //Ocean
   ocean.update(clock);
@@ -540,8 +546,6 @@ function animate() {
     console.log("Pirate #"+npc.pirate_id+" removed!");
 
   }
-
-
 
   frames++;
 }

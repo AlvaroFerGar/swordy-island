@@ -58,10 +58,10 @@ export async function createTextSprite(text, fontpath) {
 }
 
 export async function createGuyblockText(pirate) {
-  const textSprite = await createTextSprite("Guyblock","./assets/lucasarts-scumm-solid.otf");
+  let textSprite = await createTextSprite("Guyblock","./assets/lucasarts-scumm-solid.otf");
 
-  // Añadir esto después de crear el sprite para ver sus dimensiones
 
+  textSprite.name ="sprite"
   pirate.add(textSprite);
   textSprite.position.set(0, pirate.pirateHeight*2, 0);
 
