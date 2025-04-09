@@ -387,7 +387,7 @@ function animate() {
   ocean.update(clock);
 
   //Pirates
-  if(pirate_list.length<3)
+  if(pirate_list.length<3 && !battleSystem.inBattle)
   {
     let piratenpc= createRandomNPC(pirate_id, cities_points, grid);
     scene.add(piratenpc);
@@ -400,8 +400,17 @@ function animate() {
   {
 
     if (battleSystem.inBattle)
-      continue
+    {
+      if(npc==battleSystem.collisionatedPirate)
+        continue;
 
+      if(battleSystem.zoomingToCollision)
+        npc.position.y = npc.position.y - 0.1;
+      else
+      removeNPC(npc);
+
+      continue;
+    }
     npc.update(delta);
 
 
@@ -412,20 +421,7 @@ function animate() {
     if(npc.hasPath===true)
       continue
 
-    scene.remove(npc);
-
-    if (npc.geometry) pirate.geometry.dispose();
-    if (npc.material) {
-        if (Array.isArray(npc.material)) {
-          npc.material.forEach(mat => mat.dispose());
-        } else {
-          npc.material.dispose();
-        }
-    }
-    let index = pirate_list.indexOf(npc);
-    if (index !== -1) {
-        pirate_list.splice(index, 1);
-    }
+    removeNPC(npc);
 
     console.log("Pirate #"+npc.pirate_id+" removed!");
 
@@ -436,6 +432,23 @@ function animate() {
 animate();
 
 
+
+  function removeNPC(npc) {
+    scene.remove(npc);
+
+    if (npc.geometry) pirate.geometry.dispose();
+    if (npc.material) {
+      if (Array.isArray(npc.material)) {
+        npc.material.forEach(mat => mat.dispose());
+      } else {
+        npc.material.dispose();
+      }
+    }
+    let index = pirate_list.indexOf(npc);
+    if (index !== -1) {
+      pirate_list.splice(index, 1);
+    }
+  }
 }
 
 
